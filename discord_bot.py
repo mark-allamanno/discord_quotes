@@ -27,6 +27,10 @@ CHANNEL_LOCK = os.getenv('CHANNEL_LOCK')
 # Get the filename of the leaderboard image to send in the chat
 TEMP_FILE_NAME = os.getenv('LEADERBOARD_NAME')
 
+# Then finally declare a set of seen quotes at this point in time
+SEEN_QUOTES = set()
+SEEN_MEMES = set()
+
 
 def lock_to_channel(channel):
     """Short decorator function to lock these commands to the channel we decide present in the .env file"""
@@ -38,7 +42,18 @@ def all_quotes_by(author):
     """Get all the quotes by a specified person. Returns a list of lists of a person's quotes"""
 
     with open(CSV_FILE, 'r') as quotes:
-        return [q for q in csv.reader(quotes) if author == 'random' or author.title() in q]
+
+        # Get all of the quotes of the specific person and remove any duplicate quotes
+        all_quotes = {tuple(q) for q in csv.reader(quotes) if author == 'random' or author.title() in q}
+        remove_duplicates = all_quotes - SEEN_QUOTES
+
+        # If every quote of theirs has already been sent then remove them from seen and return all their quotes
+        if not remove_duplicates:
+            SEEN_QUOTES -= all_quotes
+            return list(all_quotes)
+
+        # Otherwise just return the new and fresh quotes
+        return list(remove_duplicates)
 
 
 def get_statistics_dict():
@@ -157,9 +172,12 @@ async def get_quote(ctx, quote_author='random'):
         quote = random.SystemRandom().choice(quotes_list)
         quote_list = [(quote[i], quote[i + 1]) for i in range(0, len(quote), 2)]
 
-        # Iterate over all pairs and send them as a message to the server. This accounts for multiquotes
+        # Since we are now sending this quote add it to the seen quotes set
+        SEEN_QUOTES.add(tuple(quote))
+
+        # Iterate over all pairs and send them as a message to the server. This accounts for multi-quotes
         for quotation, author in quote_list:
-            await ctx.channel.send(f'**"{quotation}"**\n' \
+            await ctx.channel.send(f'**"{quotation}"**\n'
                                    f'-*{author.title()}*')
 
     else:
@@ -224,13 +242,13 @@ async def remove_meme(ctx, author=None, filename=None):
 async def get_meme(ctx, author='random'):
     """Send back a meme that is associated with a given author if they exist in the database"""
 
-    author = author.lower()  # Make sure the author's name is lowercased for homogeneity
+    author = author.lower()  # Make sure the author's name is lowercase for homogeneity
 
     # Then make sure the author exists in the database before pulling a meme
     if not Path(MEMES_PATH, author).exists() and author != 'random':
         await ctx.channel.send(f'{author} has no memes associated with them.')
         return
-    
+
     # Create a new random generator to pick out our memes for us
     random_gen = random.SystemRandom()
 
@@ -238,8 +256,19 @@ async def get_meme(ctx, author='random'):
     if author == 'random':
         author = random_gen.choice(list(Path(MEMES_PATH).iterdir()))
 
-    # Then randomly choose a meme for that person and send it in the chat
-    meme = random_gen.choice(list(Path(MEMES_PATH, author).iterdir()))
+    # Then get all of the memes for this person and remove the duplicate from the possible pool
+    all_memes = {str(file) for file in Path(MEMES_PATH, author).iterdir()}
+    remove_duplicates = all_memes - SEEN_MEMES
+
+    # If all of the memes are duplicates then remove all of their memes and choose from the total pool
+    if not remove_duplicates:
+        SEEN_MEMES -= all_memes
+        meme = random_gen.choice(list(all_memes))
+    else:
+        meme = random_gen.choice(list(remove_duplicates))
+
+    # Then add the newly chosen meme to the seen set and send it in chat
+    SEEN_MEMES.add(str(meme))
 
     await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, author, meme))))
 
