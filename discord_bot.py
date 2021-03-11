@@ -243,7 +243,7 @@ async def remove_meme(ctx, author=None, filename=None):
 
         if meme_file.stem == filename:
             meme_file.unlink()
-            await ctx.channel.send(f"Meme {meme_file} was remove from {author}'s meme folder sucessfully")
+            await ctx.channel.send(f"Meme {meme_file.name} was remove from {author}'s meme folder sucessfully")
             return
     
     # If we make it here then we never found the file to remove, so something is wrong. Let the user know
@@ -255,8 +255,7 @@ async def remove_meme(ctx, author=None, filename=None):
 async def get_meme(ctx, author='random'):
     """Send back a meme that is associated with a given author if they exist in the database"""
 
-    global SEEN_MEMES   # Use the global seen memes variable
-
+    global SEEN_MEMES        # Use the global seen memes variable
     author = author.lower()  # Make sure the author's name is lowercase for homogeneity
 
     # Then make sure the author exists in the database before pulling a meme
@@ -291,9 +290,10 @@ async def get_meme(ctx, author='random'):
 @BOT.command(name='leaderboard', brief='Command to see the overall number of memes/quotes associated with each person')
 @lock_to_channel(CHANNEL_LOCK)
 async def get_statistics(ctx, *args):
-    """Send back a matplotlib image that represents the current number of quotes/memes for each person in the database"""
+    """Send back a matplotlib image that represents the current number of quotes/memes for each person in the"""
+    """ database"""
     
-    scoreboard_info = get_statistics_dict() # Get the scoreboard in the form Name -> (# Quotes, # Memes)
+    scoreboard_info = get_statistics_dict()  # Get the scoreboard in the form Name -> (# Quotes, # Memes)
     
     if len(args) == 0:
         # Raw leaderboard data of everyone
