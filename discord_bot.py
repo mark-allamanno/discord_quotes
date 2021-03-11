@@ -27,7 +27,7 @@ CHANNEL_LOCK = os.getenv('CHANNEL_LOCK')
 # Get the filename of the leaderboard image to send in the chat
 TEMP_FILE_NAME = os.getenv('LEADERBOARD_NAME')
 
-# Then finally declare a set of seen quotes at this point in time
+# Then finally declare a set of seen quotes and memes at this point in time
 SEEN_QUOTES = set()
 SEEN_MEMES = set()
 
@@ -74,12 +74,12 @@ def get_statistics_dict():
             # Then iterate over all of the components of the quote ie quote body and author 
             for index, author in quote:
 
-                # The authors are always on odd indices in teh database so only increment the quote count for valid people
+                # The authors are always on odd indices in the database so only increment the quote count for them
                 if index % 2 == 1:
                     quotes, memes = scoreboard[author]
                     scoreboard[author] = quotes + 1, memes
     
-    # Then iterate over the meme directory and increment the number of memes by the directiry size
+    # Then iterate over the meme directory and increment the number of memes by the directory size
     for author in Path(MEMES_PATH).iterdir():
 
         # Title the author so we can ensure that it will match the format present in the quotes file
@@ -102,20 +102,29 @@ async def summon_picklechu(ctx):
 
 @BOT.command(name='add-quote', brief='Command to add a new quote to the database')
 @lock_to_channel(CHANNEL_LOCK)
-async def save_quote(ctx, *args):
+async def save_quote(ctx, *quote):
     """Adds a specified quote to the CSV file. Can take in a variable amount of arguments but the format should be """
     """"quote" author "quote" author..."""
 
     # Make sure the length of the arguments parameter makes sense before attempting to add it
-    if len(args) % 2 == 1:
+    if len(quote) % 2 == 1:
         await ctx.channel.send('Why is the number of input arguments odd? It should always be even!')
         return
+
+    # Then check to make sure that this quote is unique before appending it to the csv file
+    with open(CSV_FILE, 'r') as quotes:
+
+        # Iterate over all rows of the csv file and make sure that this quote does not match it exactly
+        for row in csv.reader(quotes):
+            if all([string.lower() == partial.lower() for string, partial in zip(row, quote)]):
+                await ctx.channel.send('This quote already exists in the database, so no need to add it again.')
+                return
 
     with open(CSV_FILE, 'a') as quotes:
 
         # Open a new CSV writer and then write the quote surrounded by quotation marks to the college_quotes.csv file
         writer = csv.writer(quotes, quoting=csv.QUOTE_ALL)
-        writer.writerow([s.title() if i % 2 else s for i, s in enumerate(args)])
+        writer.writerow([s.title() if i % 2 else s for i, s in enumerate(quote)])
 
         # Then send a confirmation message so the user knows it was added
         await ctx.channel.send('Successfully added quote to database! Your lapse in judgement has been immortalized.')
@@ -124,6 +133,7 @@ async def save_quote(ctx, *args):
 @BOT.command(name='delete-quote', brief='Command to remove a mistyped quote from the database')
 @lock_to_channel(CHANNEL_LOCK)
 async def remove_quote(ctx, *args):
+    """Removes a specified quote from the database in the case of a typo or duplicate"""
 
     # If the user didnt input any arguments or they input an odd number of arguments then the query is strange,
     # so dont parse it
@@ -216,6 +226,7 @@ async def save_meme(ctx, author, *filenames):
 @BOT.command(name='delete-meme', brief='Command to remove a mistyped or mis-associated meme from the database')
 @lock_to_channel(CHANNEL_LOCK)
 async def remove_meme(ctx, author=None, filename=None):
+    """Removes a specified meme from the database in the case of a typo or duplicate"""
 
     # If the path to the given author does not exist then we cannot delete any memes for them
     if not Path(MEMES_PATH, author).exists():

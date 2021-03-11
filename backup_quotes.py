@@ -9,12 +9,12 @@ import csv
 dotenv.load_dotenv()
 DATABASE = os.getenv('DATABASE_PATH')
 
-# Get the correct scope that we are working in 
+# Get the correct scope that we are working in for Google Sheets
 SCOPE = ['https://www.googleapis.com/auth/drive']
 
 # Create and log into Google Spreadsheets and open the 'College Quotes' Worksheet
-CREDS = ServiceAccountCredentials.from_json_keyfile_name(os.getenv('SECRET'), SCOPE)
-CLIENT = gspread.authorize(CREDS)
+CREDENTIALS = ServiceAccountCredentials.from_json_keyfile_name(os.getenv('SECRET'), SCOPE)
+CLIENT = gspread.authorize(CREDENTIALS)
 SHEET = CLIENT.open('College Quotes').sheet1
 
 # Open up the college_quotes.csv file and parse it line by line into the correct form

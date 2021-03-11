@@ -8,11 +8,11 @@ import dotenv
 # Initialize and load the memes and credentials environment variables
 dotenv.load_dotenv()
 MEMES_PATH = os.getenv('MEMES_FOLDER')
-CREDS = os.getenv('CREDENTIALS')
+CREDENTIALS = os.getenv('CREDENTIALS')
 
 # Create a new authentication system and attempt to load credentials from file
 AUTH = GoogleAuth()
-AUTH.LoadCredentialsFile(CREDS)
+AUTH.LoadCredentialsFile(CREDENTIALS)
 
 # If the credentials failed to load from file authenticate with teh web server
 if AUTH.credentials is None:
@@ -27,7 +27,7 @@ else:
     AUTH.Authorize()
 
 # Then be sure to save these new credentials for next time and create new drive instance
-AUTH.SaveCredentialsFile(CREDS)
+AUTH.SaveCredentialsFile(CREDENTIALS)
 DRIVE = GoogleDrive(AUTH)
 
 # Get the root folder of the database backup that we need to parent new folders to
