@@ -41,6 +41,8 @@ def lock_to_channel(channel):
 def all_quotes_by(author):
     """Get all the quotes by a specified person. Returns a list of lists of a person's quotes"""
 
+    global SEEN_QUOTES  # Use the global seen quotes variable
+
     with open(CSV_FILE, 'r') as quotes:
 
         # Get all of the quotes of the specific person and remove any duplicate quotes
@@ -241,6 +243,8 @@ async def remove_meme(ctx, author=None, filename=None):
 @lock_to_channel(CHANNEL_LOCK)
 async def get_meme(ctx, author='random'):
     """Send back a meme that is associated with a given author if they exist in the database"""
+
+    global SEEN_MEMES   # Use the global seen memes variable
 
     author = author.lower()  # Make sure the author's name is lowercase for homogeneity
 
