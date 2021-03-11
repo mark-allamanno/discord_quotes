@@ -181,7 +181,7 @@ async def save_meme(ctx, author, *filenames):
 
         # Create a valid filename with extension for the file and get all filenames already present in the directory
         filename = f'{file}{Path(attachment.filename).suffix}'
-        present_files = [Path(name).stem for name in Path(MEMES_PATH, author).iterdir()]
+        present_files = [name.stem for name in Path(MEMES_PATH, author).iterdir()]
 
         # Then upload the file only if it has a unique name otherwise let the user know it failed
         if filename not in present_files:
@@ -208,14 +208,14 @@ async def remove_meme(ctx, author=None, filename=None):
         return
 
     # Otherwise iterate over the given directory to find the file to delete and delete it
-    for meme in Path(MEMES_PATH, author).iterdir():
+    for meme_file in Path(MEMES_PATH, author).iterdir():
 
-        if Path(meme).stem == filename:
-            Path(MEMES_PATH, author, meme).unlink()
-            await ctx.channel.send(f"Meme {meme} was remove from {author}'s meme folder sucessfully")
+        if meme_file.stem == filename:
+            meme_file.unlink()
+            await ctx.channel.send(f"Meme {meme_file} was remove from {author}'s meme folder sucessfully")
             return
     
-    # If we make it here then we neveer found the file to remove, so something is wrong. Let the user know
+    # If we make it here then we never found the file to remove, so something is wrong. Let the user know
     await ctx.channel.send(f"Meme was not present in {author}'s directory, are you sure this is the right name?")
 
 
@@ -239,7 +239,7 @@ async def get_meme(ctx, author='random'):
         author = random_gen.choice(list(Path(MEMES_PATH).iterdir()))
 
     # Then randomly choose a meme for that person and send it in the chat
-    meme = random_gen.choice(list(Path(MEMES_PATH, author)))
+    meme = random_gen.choice(list(Path(MEMES_PATH, author).iterdir()))
 
     await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, author, meme))))
 
