@@ -39,7 +39,7 @@ def lock_to_channel(channel):
     return commands.check(lambda ctx: ctx.channel.name == channel)
 
 
-def free_inmates(ctx, inmate_role, inmate_channel):
+async def free_inmates(ctx, inmate_role, inmate_channel):
 
     await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
     time.sleep(5)
