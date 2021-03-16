@@ -41,10 +41,10 @@ def lock_to_channel(channel):
 
 def free_inmates(ctx, inmate_role, inmate_channel):
 
-    inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
+    await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
     time.sleep(5)
 
-    for user in ctx.server.members:
+    for user in ctx.guild.members:
         if inmate_role in user.roles:
             user.remove_role(inmate_role)
 
