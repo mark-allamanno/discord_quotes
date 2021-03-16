@@ -6,7 +6,9 @@ import dotenv
 import os
 import csv
 import random
-import sched, time
+import sched
+import time
+import asyncio
 from pathlib import Path
 from collections import defaultdict
 
@@ -39,14 +41,18 @@ def lock_to_channel(channel):
     return commands.check(lambda ctx: ctx.channel.name == channel)
 
 
-async def free_inmates(ctx, inmate_role, inmate_channel):
+def free_inmates(ctx, inmate_role, inmate_channel):
 
-    await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
-    time.sleep(5)
+    async def remove_from_role():
 
-    for user in ctx.guild.members:
-        if inmate_role in user.roles:
-            user.remove_role(inmate_role)
+        await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
+        time.sleep(5)
+
+        for user in ctx.guild.members:
+            if inmate_role in user.roles:
+                await user.remove_role(inmate_role)
+
+    asyncio.run(remove_from_role())
 
 
 def all_quotes_by(author):
