@@ -6,8 +6,6 @@ import dotenv
 import os
 import csv
 import random
-import sched
-import time
 import asyncio
 from pathlib import Path
 from collections import defaultdict
@@ -112,7 +110,7 @@ async def horny_jail(ctx):
     await asyncio.sleep(25)
 
     await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
-    time.sleep(5)
+    await asyncio.sleep(3)
 
     for user in ctx.guild.members:
         if inmate_role in user.roles:
