@@ -41,7 +41,8 @@ def lock_to_channel(channel):
 
 def free_inmates(ctx, inmate_role, inmate_channel):
 
-    inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server")
+    inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
+    time.sleep(5)
 
     for user in ctx.server.members:
         if inmate_role in user.roles:
@@ -117,7 +118,7 @@ async def horny_jail(ctx):
         await user.add_roles(inmate_role)
 
     await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'horny-jail.jpg'))))
-    await inmate_channel.send(f'You can leave when your horn levels subside in approximately 10 minutes.')
+    await inmate_channel.send(f'You can leave when your horny levels subside in approximately 10 minutes.')
 
     release = sched.scheduler(time.time, time.sleep)
     release.enter(10, 2, free_inmates, argument=(ctx, inmate_role, inmate_channel))
