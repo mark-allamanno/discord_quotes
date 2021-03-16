@@ -127,7 +127,7 @@ async def horny_jail(ctx):
     await inmate_channel.send(f'You can leave when your horny levels subside in approximately 10 minutes.')
 
     release = sched.scheduler(time.time, time.sleep)
-    release.enter(10, 2, free_inmates, argument=(ctx, inmate_role, inmate_channel))
+    release.enter(3, 2, free_inmates, argument=(ctx, inmate_role, inmate_channel))
     release.run(blocking=False)
 
 
