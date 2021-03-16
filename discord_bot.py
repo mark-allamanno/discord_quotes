@@ -103,7 +103,7 @@ async def horny_jail(ctx):
     horny_inmate = discord.utils.find(lambda r: r.name == 'horny-jail', ctx.guild.roles)
 
     for user in ctx.message.mentions:
-        user.add_roles(horny_inmate)
+        await user.add_roles(horny_inmate)
 
     print('Success')
 
