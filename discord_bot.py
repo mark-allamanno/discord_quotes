@@ -112,9 +112,8 @@ async def horny_jail(ctx):
     await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
     await asyncio.sleep(3)
 
-    for user in ctx.guild.members:
-        if inmate_role in user.roles:
-            await user.remove_roles(inmate_role)
+    for user in ctx.message.mentions:
+        await user.remove_roles(inmate_role)
 
 
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
