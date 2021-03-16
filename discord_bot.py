@@ -114,7 +114,7 @@ async def horny_jail(ctx):
 
     for user in ctx.guild.members:
         if inmate_role in user.roles:
-            await user.remove_role(inmate_role)
+            await user.remove_roles(inmate_role)
 
 
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
