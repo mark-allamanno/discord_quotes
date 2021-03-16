@@ -27,7 +27,7 @@ CHANNEL_LOCK = os.getenv('CHANNEL_LOCK')
 # Get the filename of the leaderboard image to send in the chat
 TEMP_FILE_NAME = os.getenv('LEADERBOARD_NAME')
 
-# Then finally declare a set of seen quotes and memes at this point in time
+# Then finally declare a set of seen quotes and memes at this point in time to force new random things
 SEEN_QUOTES = set()
 SEEN_MEMES = set()
 
@@ -43,10 +43,15 @@ def all_quotes_by(author):
 
     global SEEN_QUOTES  # Use the global seen quotes variable
 
-    with open(CSV_FILE, 'r') as quotes:
+    with open(CSV_FILE, 'r') as college_quotes:
+
+        all_quotes = set()  # Create a new set of all he quotes that involve this person
 
         # Get all of the quotes of the specific person and remove any duplicate quotes
-        all_quotes = {tuple(q) for q in csv.reader(quotes) if author == 'random' or author.title() in q}
+        for quote in csv.reader(college_quotes):
+            if author == 'random' or any(author.title() in quote[i] for i in range(1, len(quote), 2)):
+                all_quotes.add(quote)
+
         remove_duplicates = all_quotes - SEEN_QUOTES
 
         # If every quote of theirs has already been sent then remove them from seen and return all their quotes
@@ -111,19 +116,18 @@ async def save_quote(ctx, *quote):
         await ctx.channel.send('Why is the number of input arguments odd? It should always be even!')
         return
 
-    # Then check to make sure that this quote is unique before appending it to the csv file
-    with open(CSV_FILE, 'r') as quotes:
+    with open(CSV_FILE, 'r') as college_quotes:
 
         # Iterate over all rows of the csv file and make sure that this quote does not match it exactly
-        for row in csv.reader(quotes):
+        for row in csv.reader(college_quotes):
             if all([string.lower() == partial.lower() for string, partial in zip(row, quote)]):
                 await ctx.channel.send('This quote already exists in the database, so no need to add it again.')
                 return
 
-    with open(CSV_FILE, 'a') as quotes:
+    with open(CSV_FILE, 'a') as college_quotes:
 
         # Open a new CSV writer and then write the quote surrounded by quotation marks to the college_quotes.csv file
-        writer = csv.writer(quotes, quoting=csv.QUOTE_ALL)
+        writer = csv.writer(college_quotes, quoting=csv.QUOTE_ALL)
         writer.writerow([s.title() if i % 2 else s for i, s in enumerate(quote)])
 
         # Then send a confirmation message so the user knows it was added
@@ -138,7 +142,7 @@ async def remove_quote(ctx, *args):
     # If the user didnt input any arguments or they input an odd number of arguments then the query is strange,
     # so dont parse it
     if len(args) == 0 or len(args) % 2 == 1:
-        await ctx.channel.send(f"You either didn't give a quote to delete or the quote's formatted was malformed.")
+        await ctx.channel.send("You either didn't give a quote to delete or the quote's formatted was malformed.")
         return
 
     partial_quote = list(args)  # Convert the arguments to a list so we can check for sublist
@@ -178,7 +182,7 @@ async def get_quote(ctx, quote_author='random'):
     # Get all the quotes by a specific person and then choose how to handle it
     quotes_list = all_quotes_by(quote_author)
 
-    if quotes_list:     # Make sure the requested author has quotes to search
+    if quotes_list:  # Make sure the requested author has quotes to search
 
         # Get a random quote from the list of quotes and parse them into quote, author pairs
         quote = random.SystemRandom().choice(quotes_list)
@@ -243,7 +247,7 @@ async def remove_meme(ctx, author=None, filename=None):
 
         if meme_file.stem == filename:
             meme_file.unlink()
-            await ctx.channel.send(f"Meme {meme_file.name} was remove from {author}'s meme folder sucessfully")
+            await ctx.channel.send(f"Meme {meme_file.name} was remove from {author}'s meme folder successfully")
             return
     
     # If we make it here then we never found the file to remove, so something is wrong. Let the user know
