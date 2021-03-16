@@ -96,25 +96,36 @@ def get_statistics_dict():
     return scoreboard
 
 
-@BOT.command(name='jail-time', brief='')
+@BOT.command(name='horny-jail', brief='Sends the mentioned users to the horny jail role that restricts them')
 async def horny_jail(ctx):
 
+    # Get the role and the channel of the horny jail in the current server
     inmate_role = discord.utils.find(lambda r: r.name == 'horny-jail', ctx.guild.roles)
     inmate_channel = discord.utils.find(lambda c: c.name == 'horny-jail', ctx.guild.channels)
 
+    # Then add all mentioned users to the horny jail so they are locked there
     for user in ctx.message.mentions:
         await user.add_roles(inmate_role)
 
+    # Let the invoking channel know what has happened to the user since they wont be visible for while
+    await ctx.channel.send(f'User(s) {*ctx.message.mentions,} have been sent to uwu jail for their crimes. '
+                           f'You can rest easy now.')
+
+    # Then send them the horny jail bonk picture and let then know that they are locked out. Finally sleep the thread
     await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'horny-jail.jpg'))))
-    await inmate_channel.send(f'You can leave when your horny levels subside in approximately 10 minutes.')
+    await inmate_channel.send(f'{*ctx.message.mentions,} you all are in uwu jail. You can leave when your horny levels '
+                              f'subside in approximately 10 minutes.')
     await asyncio.sleep(25)
 
+    # After we have waited the requisite amount of time then send them a message letting them know they are being freed
     await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
     await asyncio.sleep(3)
 
+    # Free then from the jail that they were locked to for the time duration
     for user in ctx.message.mentions:
         await user.remove_roles(inmate_role)
 
+    # Finally purge the horny jail channel so that next time it will be like the first time
     await inmate_channel.purge()
 
 
