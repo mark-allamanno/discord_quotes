@@ -115,6 +115,8 @@ async def horny_jail(ctx):
     for user in ctx.message.mentions:
         await user.remove_roles(inmate_role)
 
+    await inmate_channel.purge()
+
 
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
 @lock_to_channel(CHANNEL_LOCK)
