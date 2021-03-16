@@ -6,6 +6,7 @@ import dotenv
 import os
 import csv
 import random
+import sched, time
 from pathlib import Path
 from collections import defaultdict
 
@@ -36,6 +37,15 @@ def lock_to_channel(channel):
     """Short decorator function to lock these commands to the channel we decide present in the .env file"""
 
     return commands.check(lambda ctx: ctx.channel.name == channel)
+
+
+def free_inmates(ctx, inmate_role, inmate_channel):
+
+    inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server")
+
+    for user in ctx.server.members:
+        if inmate_role in user.roles:
+            user.remove_role(inmate_role)
 
 
 def all_quotes_by(author):
@@ -100,12 +110,18 @@ def get_statistics_dict():
 @BOT.command(name='jail-time', brief='')
 async def horny_jail(ctx):
 
-    horny_inmate = discord.utils.find(lambda r: r.name == 'horny-jail', ctx.guild.roles)
+    inmate_role = discord.utils.find(lambda r: r.name == 'horny-jail', ctx.guild.roles)
+    inmate_channel = discord.utils.find(lambda c: c.name == 'horny-jail', ctx.guild.channels)
 
     for user in ctx.message.mentions:
-        await user.add_roles(horny_inmate)
+        await user.add_roles(inmate_role)
 
-    print('Success')
+    await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'horny-jail.jpg'))))
+    await inmate_channel.send(f'You can leave when your horn levels subside in approximately 10 minutes.')
+
+    release = sched.scheduler(time.time, time.sleep)
+    release.enter(10, 2, free_inmates, argument=(ctx, inmate_role, inmate_channel))
+    release.run()
 
 
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
