@@ -50,7 +50,7 @@ def all_quotes_by(author):
         # Get all of the quotes of the specific person and remove any duplicate quotes
         for quote in csv.reader(college_quotes):
             if author == 'random' or any(author.title() in quote[i] for i in range(1, len(quote), 2)):
-                all_quotes.add(quote)
+                all_quotes.add(tuple(quote))
 
         remove_duplicates = all_quotes - SEEN_QUOTES
 
