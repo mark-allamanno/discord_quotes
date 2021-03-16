@@ -100,10 +100,10 @@ def get_statistics_dict():
 @BOT.command(name='jail-time', brief='')
 async def horny_jail(ctx):
 
-    jail_channel = discord.utils.find(lambda c: c.name == 'horny-jail', ctx.message.server.channels)
+    horny_inmate = discord.utils.find(lambda r: r.name == 'horny-jail', ctx.guild.roles)
 
     for user in ctx.message.mentions:
-        user.move_to(jail_channel)
+        user.add_roles(horny_inmate)
 
     print('Success')
 
