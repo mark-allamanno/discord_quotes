@@ -128,7 +128,7 @@ async def horny_jail(ctx):
 
     release = sched.scheduler(time.time, time.sleep)
     release.enter(10, 2, free_inmates, argument=(ctx, inmate_role, inmate_channel))
-    release.run()
+    release.run(blocking=False)
 
 
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
