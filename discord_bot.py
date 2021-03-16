@@ -97,6 +97,17 @@ def get_statistics_dict():
     return scoreboard
 
 
+@BOT.command(name='jail-time', brief='')
+async def horny_jail(ctx):
+
+    jail_channel = discord.utils.find(lambda c: c.name == 'horny-jail', ctx.message.server.channels)
+
+    for user in ctx.message.mentions:
+        user.move_to(jail_channel)
+
+    print('Success')
+
+
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
 @lock_to_channel(CHANNEL_LOCK)
 async def summon_picklechu(ctx):
