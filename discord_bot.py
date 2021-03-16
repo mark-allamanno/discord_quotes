@@ -12,7 +12,6 @@ import asyncio
 from pathlib import Path
 from collections import defaultdict
 
-
 # Create a new bot with the prefix of '$'
 BOT = commands.Bot(command_prefix='$')
 
@@ -39,20 +38,6 @@ def lock_to_channel(channel):
     """Short decorator function to lock these commands to the channel we decide present in the .env file"""
 
     return commands.check(lambda ctx: ctx.channel.name == channel)
-
-
-def free_inmates(ctx, inmate_role, inmate_channel):
-
-    async def remove_from_role():
-
-        await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
-        time.sleep(5)
-
-        for user in ctx.guild.members:
-            if inmate_role in user.roles:
-                await user.remove_role(inmate_role)
-
-    asyncio.run(remove_from_role())
 
 
 def all_quotes_by(author):
@@ -89,7 +74,7 @@ def get_statistics_dict():
 
     # Open the csv file of all of the quotes inside of it
     with open(CSV_FILE, 'r') as college_quotes:
-        
+
         # Get every line in the csv file as we need to check each line for its authors
         for quote in csv.reader(college_quotes):
 
@@ -100,17 +85,16 @@ def get_statistics_dict():
                 if index % 2 == 1:
                     quotes, memes = scoreboard[author]
                     scoreboard[author] = quotes + 1, memes
-    
+
     # Then iterate over the meme directory and increment the number of memes by the directory size
     for author in Path(MEMES_PATH).iterdir():
-
         # Title the author so we can ensure that it will match the format present in the quotes file
         author = author.name.title()
 
         # Then get the current quote / meme count and assign it a new value
         quotes, memes = scoreboard[author]
         scoreboard[author] = quotes, len(list(Path(MEMES_PATH, author).iterdir()))
-    
+
     return scoreboard
 
 
@@ -125,10 +109,14 @@ async def horny_jail(ctx):
 
     await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'horny-jail.jpg'))))
     await inmate_channel.send(f'You can leave when your horny levels subside in approximately 10 minutes.')
+    await asyncio.sleep(25)
 
-    release = sched.scheduler(time.time, time.sleep)
-    release.enter(3, 2, free_inmates, argument=(ctx, inmate_role, inmate_channel))
-    release.run(blocking=False)
+    await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
+    time.sleep(5)
+
+    for user in ctx.guild.members:
+        if inmate_role in user.roles:
+            await user.remove_role(inmate_role)
 
 
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
@@ -189,7 +177,7 @@ async def remove_quote(ctx, *args):
         quote_removed = False
 
         for row in csv.reader(quotes_read):
-            
+
             # If the partial quote matches this one line by line then dont write it and let us know we removed the quote
             if not all([quote.lower() == partial.lower() for quote, partial in zip(row, partial_quote)]):
                 csv_writer.writerow(row)
@@ -239,7 +227,7 @@ async def get_quote(ctx, quote_author='random'):
 async def save_meme(ctx, author, *filenames):
     """Saves memes with given filenames to the servers meme archive"""
 
-    author = author.lower()   # Make sure the author's name is lowercase for homogeneity
+    author = author.lower()  # Make sure the author's name is lowercase for homogeneity
 
     # If the path to the user doesnt exist then we need to create it to prevent issues later
     if not Path(MEMES_PATH, author).exists():
@@ -270,7 +258,7 @@ async def remove_meme(ctx, author=None, filename=None):
     if not Path(MEMES_PATH, author).exists():
         await ctx.channel.send(f"{author} doesn't exist in the database, so we cannot remove a meme for them.")
         return
-    
+
     # Make sure the user gave us the correct amount of arguments or else fail out
     elif author is None or filename is None:
         await ctx.channel.send("Query cannot be completed because you did not give enough information.")
@@ -283,7 +271,7 @@ async def remove_meme(ctx, author=None, filename=None):
             meme_file.unlink()
             await ctx.channel.send(f"Meme {meme_file.name} was remove from {author}'s meme folder successfully")
             return
-    
+
     # If we make it here then we never found the file to remove, so something is wrong. Let the user know
     await ctx.channel.send(f"Meme was not present in {author}'s directory, are you sure this is the right name?")
 
@@ -293,7 +281,7 @@ async def remove_meme(ctx, author=None, filename=None):
 async def get_meme(ctx, author='random'):
     """Send back a meme that is associated with a given author if they exist in the database"""
 
-    global SEEN_MEMES        # Use the global seen memes variable
+    global SEEN_MEMES  # Use the global seen memes variable
     author = author.lower()  # Make sure the author's name is lowercase for homogeneity
 
     # Then make sure the author exists in the database before pulling a meme
@@ -330,9 +318,9 @@ async def get_meme(ctx, author='random'):
 async def get_statistics(ctx, *args):
     """Send back a matplotlib image that represents the current number of quotes/memes for each person in the"""
     """ database"""
-    
+
     scoreboard_info = get_statistics_dict()  # Get the scoreboard in the form Name -> (# Quotes, # Memes)
-    
+
     if len(args) == 0:
         # Raw leaderboard data of everyone
         pass
@@ -347,7 +335,7 @@ async def get_statistics(ctx, *args):
 
     else:
         await ctx.channel.send("Malformed leaderboard query, cannot complete request")
-    
+
 
 @BOT.event
 async def on_ready():
@@ -356,7 +344,7 @@ async def on_ready():
     print(f'Connected to Discord Successfully!')
 
     await BOT.change_presence(
-        status=discord.Status.online, 
+        status=discord.Status.online,
         activity=discord.Activity(type=discord.ActivityType.watching, name='Tingledorf')
     )
 
