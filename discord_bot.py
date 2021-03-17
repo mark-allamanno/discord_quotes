@@ -200,7 +200,7 @@ async def remove_quote(ctx, *args):
     """Removes a specified quote from the database in the case of a typo or duplicate"""
 
     # Make sure the user that we want is making these edits to the database
-    if ctx.message.author.name != 'Bob da Great':
+    if ctx.message.author.name != 'Bob the Great':
         await ctx.channel.send(f"Nice try, {ctx.message.author.mention}, but this is only for emergencies")
         return
 
@@ -298,7 +298,7 @@ async def remove_meme(ctx, author=None, filename=None):
     """Removes a specified meme from the database in the case of a typo or duplicate"""
 
     # Make sure the user that we want is making these edits to the database
-    if ctx.message.author.name != 'Bob da Great':
+    if ctx.message.author.name != 'Bob the Great':
         await ctx.channel.send(f"Nice try, {ctx.message.author.mention}, but this is only for emergencies")
         return
 
