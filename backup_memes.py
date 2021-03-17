@@ -57,7 +57,8 @@ for directory in os.listdir(MEMES_PATH):
         
         # Query the Google Drive folder and see if this file already exists
         file_duplication = DRIVE.ListFile({'q': f"title = '{file}' and trashed = false"}).GetList()
-        
+        print(folder)
+
         # If the query was empty then we know that the file needs to uploaded into their parent folder
         if not file_duplication:
             upload = DRIVE.CreateFile({'title': file, 'parents': [{'id': folder['id']}]})

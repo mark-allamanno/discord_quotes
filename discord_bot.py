@@ -96,8 +96,9 @@ def get_statistics_dict():
     return scoreboard
 
 
-@BOT.command(name='horny-jail', brief='Sends the mentioned users to the horny jail role that restricts them')
+@BOT.command(name='horny-jail', brief='Sends the mentioned users to the horny jail for 10 minutes')
 async def horny_jail(ctx):
+    """Moves specified people into the restricted group for 10 minutes and then automatically let them out"""
 
     # Get the role and the channel of the horny jail in the current server along with all mentions for the users
     inmate_role = discord.utils.find(lambda r: r.name == 'horny-jail', ctx.guild.roles)
@@ -109,12 +110,12 @@ async def horny_jail(ctx):
         await user.add_roles(inmate_role)
 
     # Let the invoking channel know what has happened to the user since they wont be visible for while
-    await ctx.channel.send(f'User(s) {*user_mentions,} have been sent to uwu jail for their crimes. '
+    await ctx.channel.send(f'User(s) {user_mentions} have been sent to uwu jail for their crimes. '
                            f'You can rest easy now.')
 
     # Then send them the horny jail bonk picture and let then know that they are locked out. Finally sleep the thread
     await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'horny-jail.jpg'))))
-    await inmate_channel.send(f'{*user_mentions,} you all are in uwu jail. You can leave when your horny levels '
+    await inmate_channel.send(f'{user_mentions} you all are in uwu jail. You can leave when your horny levels '
                               f'subside in approximately 10 minutes.')
     await asyncio.sleep(25)
 
@@ -141,8 +142,7 @@ async def summon_picklechu(ctx):
 @BOT.command(name='add-quote', brief='Command to add a new quote to the database')
 @lock_to_channel(CHANNEL_LOCK)
 async def save_quote(ctx, *quote):
-    """Adds a specified quote to the CSV file. Can take in a variable amount of arguments but the format should be """
-    """"quote" author "quote" author..."""
+    """Adds a specified quote to the CSV file. Can take in a variable amount of quote/author pairs"""
 
     # Make sure the length of the arguments parameter makes sense before attempting to add it
     if len(quote) % 2 == 1:
@@ -327,8 +327,7 @@ async def get_meme(ctx, author='random'):
 @BOT.command(name='leaderboard', brief='Command to see the overall number of memes/quotes associated with each person')
 @lock_to_channel(CHANNEL_LOCK)
 async def get_statistics(ctx, *args):
-    """Send back a matplotlib image that represents the current number of quotes/memes for each person in the"""
-    """ database"""
+    """Send back a graph that represents the current number of quotes/memes for each person in the database"""
 
     scoreboard_info = get_statistics_dict()  # Get the scoreboard in the form Name -> (# Quotes, # Memes)
 
@@ -361,4 +360,4 @@ async def on_ready():
 
 
 if __name__ == '__main__':
-    BOT.run(TOKEN)
+    BOT.run(TOKEN)  # Application entry point
