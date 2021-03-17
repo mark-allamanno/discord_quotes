@@ -116,9 +116,7 @@ async def release_prisoners(ctx):
 
     # Iterate over all users of the server and remove their uwu jail role if they have it
     for user in ctx.guild.members:
-        for role in user.roles:
-            if role.name == 'uwu-jail':
-                user.remove_roles(inmate_role)
+        user.remove_roles(inmate_role)
 
 
 @BOT.command(name='arrest', brief='Sends the mentioned users to the uwu jail for 5 minutes')
