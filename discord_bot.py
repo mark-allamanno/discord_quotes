@@ -66,7 +66,7 @@ def all_quotes_by(author):
 
 def get_statistics_dict():
     """Get the total count of each person's quotes and memes in the database as a dictionary of the form """
-    """Name -> (#Quotes, #Memes)"""
+    """Name -> (# Quotes, # Memes)"""
 
     # Declare default dictionary of peoples names to their quote/meme counts
     scoreboard = defaultdict(lambda: (0, 0))
@@ -95,6 +95,30 @@ def get_statistics_dict():
         scoreboard[author] = quotes, len(list(Path(MEMES_PATH, author).iterdir()))
 
     return scoreboard
+
+
+@BOT.command(name='parole', brief='Forces a release of all prisoners in uwu jail if anyone abuses it')
+async def release_prisoners(ctx):
+    """Prematurely removes people from the jail in case of a malfunction or an abuse of the system"""
+
+    # Make sure it was me that sent the parole request, otherwise lock them out
+    if ctx.message.author.name != 'Deadpool':
+        await ctx.channel.send(f"Nice try, {ctx.message.author.mention}, but this is only for emergencies")
+        return
+
+    # Get the inmate channel and role so we can send a message and then release the prisoners
+    inmate_role = discord.utils.find(lambda r: r.name == 'uwu-jail', ctx.guild.roles)
+    inmate_channel = discord.utils.find(lambda c: c.name == 'uwu-jail', ctx.guild.channels)
+
+    # Send the prisoners a message that they are being saved and wait a second for them to read it
+    await inmate_channel.send(f"You're being let out early inmates. Dont make me regret it")
+    await asyncio.sleep(3)
+
+    # Iterate over all users of the server and remove their uwu jail role if they have it
+    for user in ctx.guild.members:
+        for role in user.roles:
+            if role.name == 'uwu-jail':
+                user.remove_roles(inmate_role)
 
 
 @BOT.command(name='arrest', brief='Sends the mentioned users to the uwu jail for 5 minutes')
@@ -172,6 +196,11 @@ async def save_quote(ctx, *quote):
 @lock_to_channel(CHANNEL_LOCK)
 async def remove_quote(ctx, *args):
     """Removes a specified quote from the database in the case of a typo or duplicate"""
+
+    # Make sure the user that we want is making these edits to the database
+    if ctx.message.author.name != 'Bob da Great':
+        await ctx.channel.send(f"Nice try, {ctx.message.author.mention}, but this is only for emergencies")
+        return
 
     # If the user didnt input any arguments or they input an odd number of arguments then the query is strange,
     # so dont parse it
@@ -265,6 +294,11 @@ async def save_meme(ctx, author, *filenames):
 @lock_to_channel(CHANNEL_LOCK)
 async def remove_meme(ctx, author=None, filename=None):
     """Removes a specified meme from the database in the case of a typo or duplicate"""
+
+    # Make sure the user that we want is making these edits to the database
+    if ctx.message.author.name != 'Bob da Great':
+        await ctx.channel.send(f"Nice try, {ctx.message.author.mention}, but this is only for emergencies")
+        return
 
     # If the path to the given author does not exist then we cannot delete any memes for them
     if not Path(MEMES_PATH, author).exists():
