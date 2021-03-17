@@ -55,12 +55,18 @@ for directory in os.listdir(MEMES_PATH):
     # Now we need to iterate over everyone's memes and upload them into their person's folder
     for file in os.listdir(os.path.join(MEMES_PATH, directory)):
         
-        # Query the Google Drive folder and see if this file already exists
+        # Query the Google Drive folder and assume this file is unique
         file_duplication = DRIVE.ListFile({'q': f"title = '{file}' and trashed = false"}).GetList()
-        print(folder)
+        unique_file = True
+
+        # Then iterate over every parent of every matching file to make sure this file is unique
+        for duplicate_file in file_duplication:
+            for parent in duplicate_file:
+                if parent['id'] == folder['id']:
+                    unique_file = False
 
         # If the query was empty then we know that the file needs to uploaded into their parent folder
-        if not file_duplication:
+        if unique_file:
             upload = DRIVE.CreateFile({'title': file, 'parents': [{'id': folder['id']}]})
             upload.SetContentFile(os.path.join(MEMES_PATH, directory, file))
             upload.Upload()
