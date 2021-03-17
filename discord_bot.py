@@ -102,7 +102,7 @@ async def horny_jail(ctx):
     # Get the role and the channel of the horny jail in the current server along with all mentions for the users
     inmate_role = discord.utils.find(lambda r: r.name == 'horny-jail', ctx.guild.roles)
     inmate_channel = discord.utils.find(lambda c: c.name == 'horny-jail', ctx.guild.channels)
-    user_mentions = [user.mention() for user in ctx.message.mentions]
+    user_mentions = ', '.join([user.mention for user in ctx.message.mentions])
 
     # Then add all mentioned users to the horny jail so they are locked there
     for user in ctx.message.mentions:
