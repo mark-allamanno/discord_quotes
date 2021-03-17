@@ -109,14 +109,15 @@ async def release_prisoners(ctx):
     # Get the inmate channel and role so we can send a message and then release the prisoners
     inmate_role = discord.utils.find(lambda r: r.name == 'uwu-jail', ctx.guild.roles)
     inmate_channel = discord.utils.find(lambda c: c.name == 'uwu-jail', ctx.guild.channels)
+    user_mentions = ', '.join([user.mention for user in ctx.message.mentions])
 
     # Send the prisoners a message that they are being saved and wait a second for them to read it
-    await inmate_channel.send(f"You're being let out early inmates. Dont make me regret it")
+    await inmate_channel.send(f"{user_mentions} you're being let out early for good behavior. Dont make me regret it")
     await asyncio.sleep(3)
 
     # Iterate over all users of the server and remove their uwu jail role if they have it
-    for user in inmate_channel.members:
-        user.remove_roles(inmate_role)
+    for user in ctx.message.mentions:
+        await user.remove_roles(inmate_role)
 
 
 @BOT.command(name='arrest', brief='Sends the mentioned users to the uwu jail for 5 minutes')
