@@ -61,7 +61,7 @@ for directory in os.listdir(MEMES_PATH):
 
         # Then iterate over every parent of every matching file to make sure this file is unique
         for duplicate_file in file_duplication:
-            for parent in duplicate_file:
+            for parent in duplicate_file['parents']:
                 if parent['id'] == folder['id']:
                     unique_file = False
 
