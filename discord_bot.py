@@ -115,7 +115,7 @@ async def release_prisoners(ctx):
     await asyncio.sleep(3)
 
     # Iterate over all users of the server and remove their uwu jail role if they have it
-    for user in ctx.guild.members:
+    for user in inmate_channel.members:
         user.remove_roles(inmate_role)
 
 
