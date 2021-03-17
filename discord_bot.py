@@ -119,6 +119,9 @@ async def release_prisoners(ctx):
     for user in ctx.message.mentions:
         await user.remove_roles(inmate_role)
 
+    # Finally purge the uwu jail channel so that next time it will be like the first time
+    await inmate_channel.purge()
+
 
 @BOT.command(name='arrest', brief='Sends the mentioned users to the uwu jail for 5 minutes')
 async def detain_prisoners(ctx):
