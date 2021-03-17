@@ -10,6 +10,7 @@ import asyncio
 from pathlib import Path
 from collections import defaultdict
 
+
 # Create a new bot with the prefix of '$'
 BOT = commands.Bot(command_prefix='$')
 
@@ -84,8 +85,8 @@ def get_statistics_dict():
                     quotes, memes = scoreboard[author]
                     scoreboard[author] = quotes + 1, memes
 
-    # Then iterate over the meme directory and increment the number of memes by the directory size
     for author in Path(MEMES_PATH).iterdir():
+
         # Title the author so we can ensure that it will match the format present in the quotes file
         author = author.name.title()
 
@@ -96,28 +97,28 @@ def get_statistics_dict():
     return scoreboard
 
 
-@BOT.command(name='horny-jail', brief='Sends the mentioned users to the horny jail for 10 minutes')
-async def horny_jail(ctx):
+@BOT.command(name='arrest', brief='Sends the mentioned users to the uwu jail for 5 minutes')
+async def detain_prisoners(ctx):
     """Moves specified people into the restricted group for 10 minutes and then automatically let them out"""
 
-    # Get the role and the channel of the horny jail in the current server along with all mentions for the users
-    inmate_role = discord.utils.find(lambda r: r.name == 'horny-jail', ctx.guild.roles)
-    inmate_channel = discord.utils.find(lambda c: c.name == 'horny-jail', ctx.guild.channels)
+    # Get the role and the channel of the uwu jail in the current server along with all mentions for the users
+    inmate_role = discord.utils.find(lambda r: r.name == 'uwu-jail', ctx.guild.roles)
+    inmate_channel = discord.utils.find(lambda c: c.name == 'uwu-jail', ctx.guild.channels)
     user_mentions = ', '.join([user.mention for user in ctx.message.mentions])
 
-    # Then add all mentioned users to the horny jail so they are locked there
+    # Then add all mentioned users to the uwu jail so they are locked there
     for user in ctx.message.mentions:
         await user.add_roles(inmate_role)
 
     # Let the invoking channel know what has happened to the user since they wont be visible for while
-    await ctx.channel.send(f'User(s) {user_mentions} have been sent to uwu jail for their crimes. '
+    await ctx.channel.send(f'Users {user_mentions} have been sent to uwu jail for their crimes against humanity. '
                            f'You can rest easy now.')
 
-    # Then send them the horny jail bonk picture and let then know that they are locked out. Finally sleep the thread
-    await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'horny-jail.jpg'))))
-    await inmate_channel.send(f'{user_mentions} you all are in uwu jail. You can leave when your horny levels '
-                              f'subside in approximately 10 minutes.')
-    await asyncio.sleep(25)
+    # Then send them the uwu jail bonk picture and let then know that they are locked out. Finally sleep the thread
+    await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'uwu-jail.jpg'))))
+    await inmate_channel.send(f'{user_mentions} you are in uwu jail. You can leave when your uwu levels '
+                              f'subside in approximately 5 minutes.')
+    await asyncio.sleep(300)
 
     # After we have waited the requisite amount of time then send them a message letting them know they are being freed
     await inmate_channel.send(f"Your time is up inmate. Go back and be a productive member of the server.")
@@ -127,7 +128,7 @@ async def horny_jail(ctx):
     for user in ctx.message.mentions:
         await user.remove_roles(inmate_role)
 
-    # Finally purge the horny jail channel so that next time it will be like the first time
+    # Finally purge the uwu jail channel so that next time it will be like the first time
     await inmate_channel.purge()
 
 
@@ -146,7 +147,7 @@ async def save_quote(ctx, *quote):
 
     # Make sure the length of the arguments parameter makes sense before attempting to add it
     if len(quote) % 2 == 1:
-        await ctx.channel.send('Why is the number of input arguments odd? It should always be even!')
+        await ctx.channel.send('Malformed query, the quote should be in the form "quote" author "quote" author...')
         return
 
     with open(CSV_FILE, 'r') as college_quotes:
@@ -154,7 +155,7 @@ async def save_quote(ctx, *quote):
         # Iterate over all rows of the csv file and make sure that this quote does not match it exactly
         for row in csv.reader(college_quotes):
             if all([string.lower() == partial.lower() for string, partial in zip(row, quote)]):
-                await ctx.channel.send('This quote already exists in the database, so no need to add it again.')
+                await ctx.channel.send('This quote already exists in the database, no need to add it again.')
                 return
 
     with open(CSV_FILE, 'a') as college_quotes:
@@ -164,7 +165,7 @@ async def save_quote(ctx, *quote):
         writer.writerow([s.title() if i % 2 else s for i, s in enumerate(quote)])
 
         # Then send a confirmation message so the user knows it was added
-        await ctx.channel.send('Successfully added quote to database! Your lapse in judgement has been immortalized.')
+        await ctx.channel.send('Successfully added quote to database for future usage')
 
 
 @BOT.command(name='delete-quote', brief='Command to remove a mistyped quote from the database')
@@ -203,7 +204,7 @@ async def remove_quote(ctx, *args):
     if quote_removed:
         await ctx.channel.send("Quote successfully removed from the database!")
     else:
-        await ctx.channel.send("Quote was not found in the database, are you sure you it is correct?")
+        await ctx.channel.send("Quote was not found in the database, are you sure it is correct?")
 
 
 @BOT.command(name='quote', brief='Command to fetch a quote by a specified person or anyone if left unfilled.')
@@ -230,7 +231,7 @@ async def get_quote(ctx, quote_author='random'):
                                    f'-*{author.title()}*')
 
     else:
-        await ctx.channel.send(f'{quote_author} not found in the database!')
+        await ctx.channel.send(f'{quote_author} not found in the database. Add some quotes for them!')
 
 
 @BOT.command(name='add-meme', brief='Command to add meme to the database associated with a specific person.')
@@ -257,7 +258,7 @@ async def save_meme(ctx, author, *filenames):
             await ctx.channel.send(f'Filename, {filename}, for user {author} is already taken, try again!')
 
     # Then let the user know we have saved the meme successfully
-    await ctx.channel.send('Meme has been saved to the archive for future use')
+    await ctx.channel.send('Meme has been saved to the database for future usage.')
 
 
 @BOT.command(name='delete-meme', brief='Command to remove a mistyped or mis-associated meme from the database')
@@ -297,7 +298,7 @@ async def get_meme(ctx, author='random'):
 
     # Then make sure the author exists in the database before pulling a meme
     if not Path(MEMES_PATH, author).exists() and author != 'random':
-        await ctx.channel.send(f'{author} has no memes associated with them.')
+        await ctx.channel.send(f'{author} has no memes associated with them. Add some!')
         return
 
     # Create a new random generator to pick out our memes for us
