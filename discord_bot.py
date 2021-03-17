@@ -279,7 +279,7 @@ async def save_meme(ctx, author, *filenames):
     for attachment, file in zip(ctx.message.attachments, filenames):
 
         # Create a valid filename with extension for the file and get all filenames already present in the directory
-        filename = f'{file}{Path(attachment.filename).suffix}'
+        filename = f'{file.lower()}{Path(attachment.filename).suffix}'
         present_files = [name.stem for name in Path(MEMES_PATH, author).iterdir()]
 
         # Then upload the file only if it has a unique name otherwise let the user know it failed
@@ -296,6 +296,8 @@ async def save_meme(ctx, author, *filenames):
 @lock_to_channel(CHANNEL_LOCK)
 async def remove_meme(ctx, author=None, filename=None):
     """Removes a specified meme from the database in the case of a typo or duplicate"""
+
+    author = author.lower()  # Lowercase the input author for homogeneity
 
     # Make sure the user that we want is making these edits to the database
     if ctx.message.author.name != 'Bob the Great':
