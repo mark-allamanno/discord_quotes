@@ -379,7 +379,7 @@ async def get_statistics(ctx, *args):
         await send_leaderboard_image(ctx, scoreboard_info, top_n_authors=args[0])
 
     elif len(args) == 1 and args[0] in scoreboard_info:
-        await send_leaderboard_image(ctx, scoreboard_info, requested_author=args[0])
+        await send_leaderboard_image(ctx, scoreboard_info, requested_author=int(args[0]))
 
     else:
         await ctx.channel.send("Malformed leaderboard query, cannot complete request")
