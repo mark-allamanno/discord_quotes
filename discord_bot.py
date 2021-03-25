@@ -96,6 +96,8 @@ def get_statistics_dict():
         quotes, memes = scoreboard[author.stem.title()]
         scoreboard[author] = quotes, len(list(author.iterdir()))
 
+        print(author, author.stem.title())
+
     return scoreboard
 
 
