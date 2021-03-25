@@ -93,7 +93,7 @@ def get_statistics_dict():
     for author in Path(MEMES_PATH).iterdir():
 
         # Then get the current quote / meme count and assign it a new value
-        quotes, memes = scoreboard[str(author).title()]
+        quotes, memes = scoreboard[author.stem.title()]
         scoreboard[author] = quotes, len(list(author.iterdir()))
 
     return scoreboard
