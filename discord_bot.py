@@ -444,7 +444,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
 
     # Show the legend so we know what each bar stands for and then save the image to the filesystem
     plt.legend()
-    plt.imsave('scoreboard.jpg')
+    plt.savefig('scoreboard.jpg')
 
     # Then finally send the finished image in the discord server that requested it
     await ctx.channel.send(file=discord.File('scoreboard.jpg'))
