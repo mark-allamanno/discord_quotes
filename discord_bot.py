@@ -415,8 +415,8 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     fig, ax = plt.subplots()
 
     # Add two bar plots, one for the memes and on for the quotes for a single author
-    ax.barh(meme_column, memes, color='#1f85de', width=.25, edgecolor='white', label='Memes')
-    ax.barh(quotes_column, quotes, color='#f33b2f', width=.25, edgecolor='white', label='Quotes')
+    ax.barh(meme_column, memes, color='#1f85de', height=.25, edgecolor='white', label='Memes')
+    ax.barh(quotes_column, quotes, color='#f33b2f', height=.25, edgecolor='white', label='Quotes')
 
     # Create the labels for each of the axes
     plt.xlabel('Count', labelpad=15, fontweight='bold')
