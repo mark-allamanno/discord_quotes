@@ -402,7 +402,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     # Iterate over the scoreboard dictionary and append the author, along with meme/quote counts to their lists if
     # they are the requested author or there was no specific request
     for author, (quote, meme) in scoreboard.items():
-        if author.lower() == requested_author.lower() or requested_author is None:
+        if requested_author is None or author.lower() == requested_author.lower():
             authors.append(author)
             memes.append(meme)
             quotes.append(quote)
