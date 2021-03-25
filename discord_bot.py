@@ -40,7 +40,6 @@ SEEN_MEMES = set()
 
 def lock_to_channel(channel):
     """Short decorator function to lock these commands to the channel we decide present in the .env file"""
-
     return commands.check(lambda ctx: ctx.channel.name == channel)
 
 
@@ -393,6 +392,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
          Grouped Barplot - https://www.python-graph-gallery.com/11-grouped-barplot
     """
 
+    # If we only want the top n authors to be displayed then filter out all others before we start
     if top_n_authors:
         scoreboard = {x: scoreboard[x] for x in nlargest(top_n_authors, scoreboard, key=lambda x: sum(scoreboard[x]))}
 
@@ -441,6 +441,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     ax.yaxis.grid(False)
 
     fig.tight_layout()
+    fig.set_size_inches(18.5, 10.5)
 
     # Show the legend so we know what each bar stands for and then save the image to the filesystem
     plt.legend()
