@@ -83,7 +83,7 @@ def get_statistics_dict():
         for quote in csv.reader(college_quotes):
 
             # Then iterate over all of the components of the quote ie quote body and author 
-            for index, author in quote:
+            for index, author in enumerate(quote):
 
                 # The authors are always on odd indices in the database so only increment the quote count for them
                 if index % 2 == 1:
