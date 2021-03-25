@@ -3,12 +3,17 @@ import discord
 
 import dotenv
 
+import matplotlib.pyplot as plt
+
+import numpy as np
+
 import os
 import csv
 import random
 import asyncio
 from pathlib import Path
 from collections import defaultdict
+from heapq import nlargest
 
 
 # Create a new bot with the prefix of '$'
@@ -371,19 +376,84 @@ async def get_statistics(ctx, *args):
     scoreboard_info = get_statistics_dict()  # Get the scoreboard in the form Name -> (# Quotes, # Memes)
 
     if len(args) == 0:
-        # Raw leaderboard data of everyone
-        pass
+        await send_leaderboard_image(ctx, scoreboard_info)
 
-    elif len(args) == 2 and args[0].isdigit() and (args[1] == 'memes' or args[1] == 'quotes'):
-        # Top n statistics
-        pass
+    elif len(args) == 1 and args[0].isdigit():
+        await send_leaderboard_image(ctx, scoreboard_info, top_n_authors=args[0])
 
     elif len(args) == 1 and args[0] in scoreboard_info:
-        # Single person statistics
-        pass
+        await send_leaderboard_image(ctx, scoreboard_info, requested_author=args[0])
 
     else:
         await ctx.channel.send("Malformed leaderboard query, cannot complete request")
+
+
+async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_authors=0):
+    """
+
+    References:
+         Styling - https://www.pythoncharts.com/matplotlib/beautiful-bar-charts-matplotlib/
+         Grouped Barplot - https://www.python-graph-gallery.com/11-grouped-barplot
+    """
+
+    if top_n_authors:
+        scoreboard = {x: scoreboard[x] for x in nlargest(top_n_authors, scoreboard, key=lambda x: sum(scoreboard[x]))}
+
+    # Create a new list of authors with their index corresponding memes and quote counts
+    authors, memes, quotes = list(), list(), list()
+
+    # Iterate over the scoreboard dictionary and append the author, along with meme/quote counts to their lists if
+    # they are the requested author or there was no specific request
+    for author, (meme, quote) in scoreboard.items():
+        if author == requested_author or requested_author is None:
+            authors.append(author)
+            memes.append(meme)
+            quotes.append(quote)
+
+    # Then create a new np array of 1..authors and then an offset array for the quotes
+    meme_column = np.arange(len(scoreboard))
+    quotes_column = meme_column + .25
+
+    # Get the figure and axis of the plot
+    fig, ax = plt.subplots()
+
+    # Add two bar plots, one for the memes and on for the quotes for a single author
+    ax.bar(meme_column, memes, color='#1f85de', width=.25, edgecolor='white', label='Memes')
+    ax.bar(quotes_column, quotes, color='#f33b2f', width=.25, edgecolor='white', label='Quotes')
+
+    # Create the labels for each of the axes
+    plt.xlabel('People', labelpad=15, fontweight='bold')
+    plt.ylabel('Count', labelpad=15, fontweight='bold')
+
+    # Then center each of the persons names between the two bar plots and giv ethe plot a title
+    plt.xticks(meme_column + .125, authors)
+    plt.title('Bruh Bot Scoreboard', pad=15, fontweight='bold')
+
+    # Remove a lot of the ugly spines from the original graph that matplotlib gives us
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_color('#DDDDDD')
+
+    # Remove the ticks for the persons names and graph count
+    ax.tick_params(bottom=False, left=False)
+
+    # Finally some beatifying of the axes and tightening the layout to be more compact
+    ax.set_axisbelow(True)
+    ax.yaxis.grid(True, color='#EEEEEE')
+    ax.xaxis.grid(False)
+
+    fig.tight_layout()
+
+    # Show the legend so we know what each bar stands for and then save the image to the filesystem
+    plt.legend()
+    plt.imsave('scoreboard.jpg')
+
+    # Then finally send the finished image in the discord server that requested it
+    await ctx.channel.send(file=discord.File('scoreboard.jpg'))
+
+    # Then remove from the filesystem to prevent clutter
+    os.remove('scoreboard.jpg')
 
 
 @BOT.event
