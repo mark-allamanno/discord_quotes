@@ -415,12 +415,12 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     fig, ax = plt.subplots()
 
     # Add two bar plots, one for the memes and on for the quotes for a single author
-    ax.bar(meme_column, memes, color='#1f85de', width=.25, edgecolor='white', label='Memes')
-    ax.bar(quotes_column, quotes, color='#f33b2f', width=.25, edgecolor='white', label='Quotes')
+    ax.barh(meme_column, memes, color='#1f85de', width=.25, edgecolor='white', label='Memes')
+    ax.barh(quotes_column, quotes, color='#f33b2f', width=.25, edgecolor='white', label='Quotes')
 
     # Create the labels for each of the axes
-    plt.xlabel('People', labelpad=15, fontweight='bold')
-    plt.ylabel('Count', labelpad=15, fontweight='bold')
+    plt.xlabel('Count', labelpad=15, fontweight='bold')
+    plt.ylabel('People', labelpad=15, fontweight='bold')
 
     # Then center each of the persons names between the two bar plots and giv ethe plot a title
     plt.xticks(meme_column + .125, authors)
@@ -436,7 +436,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     ax.tick_params(bottom=False, left=False)
 
     # Finally some beatifying of the axes and tightening the layout to be more compact
-    ax.set_axisleft(True)
+    ax.set_axisbelow(True)
     ax.xaxis.grid(True, color='#EEEEEE')
     ax.yaxis.grid(False)
 
