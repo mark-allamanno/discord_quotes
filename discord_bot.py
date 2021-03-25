@@ -94,7 +94,7 @@ def get_statistics_dict():
 
         # Then get the current quote / meme count and assign it a new value
         quotes, memes = scoreboard[str(author).title()]
-        scoreboard[author] = quotes, len(list(Path(MEMES_PATH, author).iterdir()))
+        scoreboard[author] = quotes, len(list(author.iterdir()))
 
     return scoreboard
 
@@ -378,7 +378,7 @@ async def get_statistics(ctx, *args):
     elif len(args) == 1 and args[0].isdigit():
         await send_leaderboard_image(ctx, scoreboard_info, top_n_authors=int(args[0]))
 
-    elif len(args) == 1 and args[0] in scoreboard_info:
+    elif len(args) == 1 and args[0].title() in scoreboard_info:
         await send_leaderboard_image(ctx, scoreboard_info, requested_author=args[0])
 
     else:
@@ -401,7 +401,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
 
     # Iterate over the scoreboard dictionary and append the author, along with meme/quote counts to their lists if
     # they are the requested author or there was no specific request
-    for author, (meme, quote) in scoreboard.items():
+    for author, (quote, meme) in scoreboard.items():
         if author == requested_author or requested_author is None:
             authors.append(author)
             memes.append(meme)
