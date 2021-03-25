@@ -423,7 +423,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     plt.ylabel('People', labelpad=15, fontweight='bold')
 
     # Then center each of the persons names between the two bar plots and giv ethe plot a title
-    plt.xticks(meme_column + .125, authors)
+    plt.yticks(meme_column + .125, authors)
     plt.title('Bruh Bot Scoreboard', pad=15, fontweight='bold')
 
     # Remove a lot of the ugly spines from the original graph that matplotlib gives us
