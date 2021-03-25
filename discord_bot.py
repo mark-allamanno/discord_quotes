@@ -14,12 +14,13 @@ import asyncio
 from pathlib import Path
 from collections import defaultdict
 from heapq import nlargest
+from typing import Dict, List, Tuple
 
 
-# Create a new bot with the prefix of '$'
+# Create a new bot with the prefix of '$' for commands
 BOT = commands.Bot(command_prefix='$')
 
-# Load the environment variables and then get the discord api token
+# Load the environment variables from the .env file and then get the discord api token
 dotenv.load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -38,12 +39,12 @@ SEEN_QUOTES = set()
 SEEN_MEMES = set()
 
 
-def lock_to_channel(channel):
-    """Short decorator function to lock these commands to the channel we decide present in the .env file"""
+def lock_to_channel(channel) -> bool:
+    """Short decorator function to lock these commands to the channel we decide - present in the .env file"""
     return commands.check(lambda ctx: ctx.channel.name == channel)
 
 
-def all_quotes_by(author):
+def all_quotes_by(author) -> List[Tuple[str]]:
     """Get all the quotes by a specified person. Returns a list of lists of a person's quotes"""
 
     global SEEN_QUOTES  # Use the global seen quotes variable
@@ -68,9 +69,9 @@ def all_quotes_by(author):
         return list(remove_duplicates)
 
 
-def get_statistics_dict():
-    """Get the total count of each person's quotes and memes in the database as a dictionary of the form """
-    """Name -> (# Quotes, # Memes)"""
+def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
+    """Get the total count of each person's quotes and memes in the database as a dictionary of the form
+    Name -> (# Quotes, # Memes)"""
 
     # Declare default dictionary of peoples names to their quote/meme counts
     scoreboard = defaultdict(lambda: (0, 0))
@@ -78,20 +79,16 @@ def get_statistics_dict():
     # Open the csv file of all of the quotes inside of it
     with open(CSV_FILE, 'r') as college_quotes:
 
-        # Get every line in the csv file as we need to check each line for its authors
+        # Get every component of every line in the csv file as we need to check each line for its authors
         for quote in csv.reader(college_quotes):
-
-            # Then iterate over all of the components of the quote ie quote body and author 
             for index, author in enumerate(quote):
 
-                # The authors are always on odd indices in the database so only increment the quote count for them
                 if index % 2 == 1:
                     quotes, memes = scoreboard[author]
                     scoreboard[author] = quotes + 1, memes
 
+    # Iterate over all the meme folders and update each authors count with the number of memes in their folder
     for author in Path(MEMES_PATH).iterdir():
-
-        # Then get the current quote / meme count and assign it a new value
         quotes, memes = scoreboard[author.stem.title()]
         scoreboard[author.stem.title()] = quotes, len(list(author.iterdir()))
 
@@ -99,7 +96,7 @@ def get_statistics_dict():
 
 
 @BOT.command(name='parole', brief='Forces a release of all prisoners in uwu jail if anyone abuses it')
-async def release_prisoners(ctx):
+async def release_prisoners(ctx) -> None:
     """Prematurely removes people from the jail in case of a malfunction or an abuse of the system"""
 
     # Make sure it was me that sent the parole request, otherwise lock them out
@@ -125,7 +122,7 @@ async def release_prisoners(ctx):
 
 
 @BOT.command(name='arrest', brief='Sends the mentioned users to the uwu jail for 5 minutes')
-async def detain_prisoners(ctx):
+async def detain_prisoners(ctx) -> None:
     """Moves specified people into the restricted group for 10 minutes and then automatically let them out"""
 
     # Get the role and the channel of the uwu jail in the current server along with all mentions for the users
@@ -161,15 +158,14 @@ async def detain_prisoners(ctx):
 
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
 @lock_to_channel(CHANNEL_LOCK)
-async def summon_picklechu(ctx):
+async def summon_picklechu(ctx) -> None:
     """Sends a picture of Picklechu in chat so everyone can know fear"""
-
     await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'picklechu.png'))))
 
 
 @BOT.command(name='add-quote', brief='Command to add a new quote to the database')
 @lock_to_channel(CHANNEL_LOCK)
-async def save_quote(ctx, *quote):
+async def save_quote(ctx, *quote) -> None:
     """Adds a specified quote to the CSV file. Can take in a variable amount of quote/author pairs"""
 
     # Make sure the length of the arguments parameter makes sense before attempting to add it
@@ -197,7 +193,7 @@ async def save_quote(ctx, *quote):
 
 @BOT.command(name='delete-quote', brief='Command to remove a mistyped quote from the database')
 @lock_to_channel(CHANNEL_LOCK)
-async def remove_quote(ctx, *args):
+async def remove_quote(ctx, *args) -> None:
     """Removes a specified quote from the database in the case of a typo or duplicate"""
 
     # Make sure the user that we want is making these edits to the database
@@ -213,16 +209,15 @@ async def remove_quote(ctx, *args):
 
     partial_quote = list(args)  # Convert the arguments to a list so we can check for sublist
 
-    # Open the old csv file we are altering and a new one with the quote removed
     with open(CSV_FILE, 'r') as quotes_read, open('college-quotes-edited.csv', 'w') as quotes_write:
 
         # Open a new CSV writer and create a boolean to track the removed quote
         csv_writer = csv.writer(quotes_write, quoting=csv.QUOTE_ALL)
         quote_removed = False
 
+        # Read every line from the original csv file and only write it to the new one of it oes not match the quote to
+        # remove given by the user
         for row in csv.reader(quotes_read):
-
-            # If the partial quote matches this one line by line then dont write it and let us know we removed the quote
             if not all([quote.lower() == partial.lower() for quote, partial in zip(row, partial_quote)]):
                 csv_writer.writerow(row)
             else:
@@ -241,9 +236,9 @@ async def remove_quote(ctx, *args):
 
 @BOT.command(name='quote', brief='Command to fetch a quote by a specified person or anyone if left unfilled.')
 @lock_to_channel(CHANNEL_LOCK)
-async def get_quote(ctx, quote_author='random'):
-    """Get a random quote by the person specified in the argument. Searched the database for quotes by them and """
-    """returns sends a random one back as a response"""
+async def get_quote(ctx, quote_author='random') -> None:
+    """Get a random quote by the person specified in the argument. Searched the database for quotes by them and
+    returns sends a random one back as a response"""
 
     # Get all the quotes by a specific person and then choose how to handle it
     quotes_list = all_quotes_by(quote_author)
@@ -268,7 +263,7 @@ async def get_quote(ctx, quote_author='random'):
 
 @BOT.command(name='add-meme', brief='Command to add meme to the database associated with a specific person.')
 @lock_to_channel(CHANNEL_LOCK)
-async def save_meme(ctx, author, *filenames):
+async def save_meme(ctx, author, *filenames) -> None:
     """Saves memes with given filenames to the servers meme archive"""
 
     author = author.lower()  # Make sure the author's name is lowercase for homogeneity
@@ -295,7 +290,7 @@ async def save_meme(ctx, author, *filenames):
 
 @BOT.command(name='delete-meme', brief='Command to remove a mistyped or mis-associated meme from the database')
 @lock_to_channel(CHANNEL_LOCK)
-async def remove_meme(ctx, author=None, filename=None):
+async def remove_meme(ctx, author=None, filename=None) -> None:
     """Removes a specified meme from the database in the case of a typo or duplicate"""
 
     author = author.lower()  # Lowercase the input author for homogeneity
@@ -319,8 +314,8 @@ async def remove_meme(ctx, author=None, filename=None):
     for meme_file in Path(MEMES_PATH, author).iterdir():
 
         if meme_file.stem == filename:
-            meme_file.unlink()
             await ctx.channel.send(f"Meme {meme_file.name} was remove from {author}'s meme folder successfully")
+            meme_file.unlink()
             return
 
     # If we make it here then we never found the file to remove, so something is wrong. Let the user know
@@ -329,7 +324,7 @@ async def remove_meme(ctx, author=None, filename=None):
 
 @BOT.command(name='meme', brief='Command to send back a meme associated with a specified person.')
 @lock_to_channel(CHANNEL_LOCK)
-async def get_meme(ctx, author='random'):
+async def get_meme(ctx, author='random') -> None:
     """Send back a meme that is associated with a given author if they exist in the database"""
 
     global SEEN_MEMES  # Use the global seen memes variable
@@ -360,37 +355,36 @@ async def get_meme(ctx, author='random'):
 
     # Then add the newly chosen meme to the seen set and send it in chat
     SEEN_MEMES.add(str(meme))
-
     await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, author, meme))))
 
 
 @BOT.command(name='leaderboard', brief='Command to see the overall number of memes/quotes associated with each person')
 @lock_to_channel(CHANNEL_LOCK)
-async def get_statistics(ctx, *args):
+async def get_statistics(ctx, *args) -> None:
     """Send back a graph that represents the current number of quotes/memes for each person in the database"""
 
     scoreboard_info = get_statistics_dict()  # Get the scoreboard in the form Name -> (# Quotes, # Memes)
 
+    # If there are no more arguments then just send the base leaderboard with everyone in it
     if len(args) == 0:
         await send_leaderboard_image(ctx, scoreboard_info)
 
+    # If the user is requesting to see the leaderboard of only the top n people then send that instead
     elif len(args) == 1 and args[0].isdigit():
         await send_leaderboard_image(ctx, scoreboard_info, top_n_authors=int(args[0]))
 
-    elif len(args) == 1 and args[0].title() in scoreboard_info:
-        await send_leaderboard_image(ctx, scoreboard_info, requested_author=args[0])
+    # Maybe they are trying to only see the leaderboard for a couple of people in which case only show those people
+    elif len(args) == 1 and all([name.title() in scoreboard_info for name in args]):
+        await send_leaderboard_image(ctx, scoreboard_info, requested_authors=args)
 
+    # Otherwise they messed something up so let them know
     else:
         await ctx.channel.send("Malformed leaderboard query, cannot complete request")
 
 
-async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_authors=0):
-    """
-
-    References:
-         Styling - https://www.pythoncharts.com/matplotlib/beautiful-bar-charts-matplotlib/
-         Grouped Barplot - https://www.python-graph-gallery.com/11-grouped-barplot
-    """
+async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_authors=0) -> None:
+    """A relatively long function that parses the raw scoreboard data into a matplotlib graph and then sends that
+    graph in the querying channel"""
 
     # If we only want the top n authors to be displayed then filter out all others before we start
     if top_n_authors:
@@ -398,11 +392,12 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
 
     # Create a new list of authors with their index corresponding memes and quote counts
     authors, memes, quotes = list(), list(), list()
+    requested_authors = [name.lower() for name in requested_authors]
 
     # Iterate over the scoreboard dictionary and append the author, along with meme/quote counts to their lists if
     # they are the requested author or there was no specific request
     for author, (quote, meme) in sorted(scoreboard.items(), key=lambda item: sum(item[1])):
-        if requested_author is None or author.lower() == requested_author.lower():
+        if requested_authors is None or author.lower() in requested_authors:
             authors.append(author)
             memes.append(meme)
             quotes.append(quote)
@@ -440,6 +435,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     ax.xaxis.grid(True, color='#EEEEEE')
     ax.yaxis.grid(False)
 
+    # Then finally resize the matplotlib graph and make sure it fills the entire screen before saving and sending it
     fig.set_size_inches(18., 14.)
     fig.tight_layout()
 
@@ -455,7 +451,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
 
 
 @BOT.event
-async def on_ready():
+async def on_ready() -> None:
     """When the client connects to the discord server print out a confirmation message and change presence"""
 
     print(f'Connected to Discord Successfully!')
