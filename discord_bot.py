@@ -401,7 +401,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
 
     # Iterate over the scoreboard dictionary and append the author, along with meme/quote counts to their lists if
     # they are the requested author or there was no specific request
-    for author, (quote, meme) in sorted(scoreboard.items(), key=lambda x: sum(scoreboard[x])):
+    for author, (quote, meme) in sorted(scoreboard.items(), key=lambda item: sum(item[1])):
         if requested_author is None or author.lower() == requested_author.lower():
             authors.append(author)
             memes.append(meme)
