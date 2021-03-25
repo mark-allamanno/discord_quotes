@@ -440,8 +440,8 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     ax.xaxis.grid(True, color='#EEEEEE')
     ax.yaxis.grid(False)
 
-    fig.tight_layout()
     fig.set_size_inches(18., 14.)
+    fig.tight_layout()
 
     # Show the legend so we know what each bar stands for and then save the image to the filesystem
     plt.legend()
