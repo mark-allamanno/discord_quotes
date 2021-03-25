@@ -408,7 +408,7 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
             quotes.append(quote)
 
     # Then create a new np array of 1..authors and then an offset array for the quotes
-    meme_column = np.arange(len(scoreboard))
+    meme_column = np.arange(len(authors))
     quotes_column = meme_column + .25
 
     # Get the figure and axis of the plot
