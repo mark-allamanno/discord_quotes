@@ -92,11 +92,8 @@ def get_statistics_dict():
 
     for author in Path(MEMES_PATH).iterdir():
 
-        # Title the author so we can ensure that it will match the format present in the quotes file
-        author = author.name.title()
-
         # Then get the current quote / meme count and assign it a new value
-        quotes, memes = scoreboard[author]
+        quotes, memes = scoreboard[str(author).title()]
         scoreboard[author] = quotes, len(list(Path(MEMES_PATH, author).iterdir()))
 
     return scoreboard
