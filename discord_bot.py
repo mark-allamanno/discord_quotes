@@ -429,16 +429,16 @@ async def send_leaderboard_image(ctx, scoreboard, requested_author=None, top_n_a
     # Remove a lot of the ugly spines from the original graph that matplotlib gives us
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    ax.spines['bottom'].set_color('#DDDDDD')
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['left'].set_color('#DDDDDD')
 
     # Remove the ticks for the persons names and graph count
     ax.tick_params(bottom=False, left=False)
 
     # Finally some beatifying of the axes and tightening the layout to be more compact
-    ax.set_axisbelow(True)
-    ax.yaxis.grid(True, color='#EEEEEE')
-    ax.xaxis.grid(False)
+    ax.set_axisleft(True)
+    ax.xaxis.grid(True, color='#EEEEEE')
+    ax.yaxis.grid(False)
 
     fig.tight_layout()
 
