@@ -143,7 +143,7 @@ async def detain_prisoners(ctx) -> None:
                            f'You can rest easy now.')
 
     # Then send them the uwu jail bonk picture and let then know that they are locked out. Finally sleep the thread
-    await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'uwu-jail.jpg'))))
+    await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'special', 'uwu-jail.jpg'))))
     await inmate_channel.send(f'{user_mentions} you are in uwu jail. You can leave when your uwu levels '
                               f'subside in approximately 5 minutes.')
     await asyncio.sleep(300)
@@ -164,7 +164,7 @@ async def detain_prisoners(ctx) -> None:
 @lock_to_channel(CHANNEL_LOCK)
 async def summon_picklechu(ctx) -> None:
     """Sends a picture of Picklechu in chat so everyone can know fear"""
-    await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, 'general', 'picklechu.png'))))
+    await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, 'special', 'picklechu.png'))))
 
 
 @BOT.command(name='add-quote', brief='Command to add a new quote to the database')
