@@ -92,8 +92,9 @@ def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
 
     # Iterate over all the meme folders and update each authors count with the number of memes in their folder
     for author in Path(MEMES_PATH).iterdir():
-        quotes, memes = scoreboard[author.stem.title()]
-        scoreboard[author.stem.title()] = quotes, len(list(author.iterdir()))
+        if author.stem != 'special':
+            quotes, memes = scoreboard[author.stem.title()]
+            scoreboard[author.stem.title()] = quotes, len(list(author.iterdir()))
 
     return scoreboard
 
