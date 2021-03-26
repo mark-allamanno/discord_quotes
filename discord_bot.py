@@ -374,7 +374,7 @@ async def get_statistics(ctx, *args) -> None:
         await send_leaderboard_image(ctx, scoreboard_info, top_n_authors=int(args[0]))
 
     # Maybe they are trying to only see the leaderboard for a couple of people in which case only show those people
-    elif len(args) == 1 and all([name.title() in scoreboard_info for name in args]):
+    elif all([name.title() in scoreboard_info for name in args]):
         await send_leaderboard_image(ctx, scoreboard_info, requested_authors=args)
 
     # Otherwise they messed something up so let them know
@@ -390,9 +390,12 @@ async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_
     if top_n_authors:
         scoreboard = {x: scoreboard[x] for x in nlargest(top_n_authors, scoreboard, key=lambda x: sum(scoreboard[x]))}
 
+    # If we only want to see the scoreboard for a handful of specific people then make sure all their names are lower
+    if requested_authors:
+        requested_authors = [name.lower() for name in requested_authors]
+
     # Create a new list of authors with their index corresponding memes and quote counts
     authors, memes, quotes = list(), list(), list()
-    requested_authors = [name.lower() for name in requested_authors]
 
     # Iterate over the scoreboard dictionary and append the author, along with meme/quote counts to their lists if
     # they are the requested author or there was no specific request
