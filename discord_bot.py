@@ -81,11 +81,14 @@ def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
 
         # Get every component of every line in the csv file as we need to check each line for its authors
         for quote in csv.reader(college_quotes):
-            for index, author in enumerate(quote):
+            for index, authors in enumerate(quote):
 
                 if index % 2 == 1:
-                    quotes, memes = scoreboard[author]
-                    scoreboard[author] = quotes + 1, memes
+
+                    # If we are on the author's index then parse all authors in the quote and change their meme count
+                    for author in authors.split(' & '):
+                        quotes, memes = scoreboard[author]
+                        scoreboard[author] = quotes + 1, memes
 
     # Iterate over all the meme folders and update each authors count with the number of memes in their folder
     for author in Path(MEMES_PATH).iterdir():
