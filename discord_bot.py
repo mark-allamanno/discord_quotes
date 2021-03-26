@@ -417,8 +417,8 @@ async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_
     ax.barh(quotes_column, quotes, color='#f33b2f', height=.25, edgecolor='white', label='Quotes')
 
     # Create the labels for each of the axes
-    plt.xlabel('Count', labelpad=15, fontweight='bold')
-    plt.ylabel('People', labelpad=15, fontweight='bold')
+    plt.xlabel('Count', labelpad=15, fontweight='bold', labelsize=15)
+    plt.ylabel('People', labelpad=15, fontweight='bold', labelsize=15)
 
     # Then center each of the persons names between the two bar plots and giv ethe plot a title
     plt.yticks(meme_column + .125, authors)
