@@ -28,9 +28,7 @@ async def on_ready() -> None:
                        f'This is pseudo-mandatory meaning I cannot enforce it but you really should or else your peers '
                        f'will be annoyed with you. Have a good night :)')
 
-    # Stop the async event loop and exit the program
-    asyncio.get_event_loop().stop()
-    exit(0)
+    await BOT.close()  # Then shut the bot down as that is all we need it to do
 
 
 if __name__ == '__main__':
