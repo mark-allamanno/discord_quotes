@@ -4,7 +4,6 @@ import discord
 import dotenv
 
 import os
-import asyncio
 
 
 # Create a new bot with the prefix of '$' for commands
