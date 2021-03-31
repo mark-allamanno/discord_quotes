@@ -133,6 +133,7 @@ async def detain_prisoners(ctx) -> None:
     inmate_role = discord.utils.find(lambda r: r.name == 'uwu-jail', ctx.guild.roles)
     inmate_channel = discord.utils.find(lambda c: c.name == 'uwu-jail', ctx.guild.channels)
     user_mentions = ', '.join([user.mention for user in ctx.message.mentions])
+    screen_names = [user.name for user in ctx.message.mentions]
 
     # Then add all mentioned users to the uwu jail so they are locked there
     for user in ctx.message.mentions:
@@ -142,8 +143,15 @@ async def detain_prisoners(ctx) -> None:
     await ctx.channel.send(f'Users {user_mentions} have been sent to uwu jail for their crimes against humanity. '
                            f'You can rest easy now.')
 
+    # Choose between the special and regular uwu jail pictures depending n if a specific person is in the jail
+    # can also be sent randomly as an easter egg
+    if 'TMI' in screen_names or .9 <= random.SystemRandom().random():
+        image_file = discord.File(str(Path(MEMES_PATH, 'special', 'uwu-jail-baguette.jpg')))
+    else:
+        image_file = discord.File(str(Path(MEMES_PATH, 'special', 'uwu-jail.jpg')))
+
     # Then send them the uwu jail bonk picture and let then know that they are locked out. Finally sleep the thread
-    await inmate_channel.send(file=discord.File(str(Path(MEMES_PATH, 'special', 'uwu-jail.jpg'))))
+    await inmate_channel.send(file=image_file)
     await inmate_channel.send(f'{user_mentions} you are in uwu jail. You can leave when your uwu levels '
                               f'subside in approximately 5 minutes.')
     await asyncio.sleep(300)
