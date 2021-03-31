@@ -27,7 +27,7 @@ async def on_ready() -> None:
                        f'This is pseudo-mandatory meaning I cannot enforce it but you really should or else your peers '
                        f'will be annoyed with you. Have a good night :)')
 
-    await BOT.close()  # Then shut the bot down as that is all we need it to do
+    await BOT.close()  # Then shut the bot down as that is all we need it to do, runs via crontab at 11pm daily
 
 
 if __name__ == '__main__':
