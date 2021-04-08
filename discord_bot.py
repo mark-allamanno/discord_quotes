@@ -467,12 +467,12 @@ async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_
 
 
 @BOT.event
-async def on_message(ctx) -> None:
+async def on_message(message) -> None:
 
-    if ctx.guild.name != 'STEM Rehab':
+    if message.guild.name != 'STEM Rehab':
         return
 
-    print(ctx.message)
+    print(message)
 
 
 @BOT.event
