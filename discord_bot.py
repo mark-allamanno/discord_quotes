@@ -467,6 +467,15 @@ async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_
 
 
 @BOT.event
+async def on_message(ctx) -> None:
+
+    if ctx.guild.name != 'STEM Rehab':
+        return
+
+    print(ctx.message)
+
+
+@BOT.event
 async def on_ready() -> None:
     """When the client connects to the discord server print out a confirmation message and change presence"""
 
