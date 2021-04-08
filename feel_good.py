@@ -22,7 +22,7 @@ async def on_ready() -> None:
     server = discord.utils.find(lambda s: s.name == 'STEM Rehab', BOT.guilds)
     channel = discord.utils.find(lambda c: c.name == 'feel-good', server.channels)
 
-    if sys.argv[1] == 'Break Reminder':
+    if 1 < len(sys.argv) and sys.argv[1] == 'Break Reminder':
         message = "Its that time of day again, please begin your regularly scheduled break. Also post what you plan " \
                   "to do with this break in chat so we can validate you are actually doing it. Also please do your " \
                   "best to enjoy it :) "
