@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
+import emoji
+
 import os
 import csv
 import random
