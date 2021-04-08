@@ -474,7 +474,7 @@ async def on_message(message) -> None:
     if message.guild.name != 'STEM Rehab':
         return
 
-    parsed_message = message.content.repalce(emoji.emojize(":wink:", use_aliases=True), ';)')
+    parsed_message = message.content.replace(emoji.emojize(":wink:", use_aliases=True), ';)')
 
     if parsed_message != message.content:
         await message.edit(conent=parsed_message)
