@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-import emoji
-
 import os
 import csv
 import random
@@ -466,20 +464,6 @@ async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_
 
     # Then remove from the filesystem to prevent clutter
     os.remove('scoreboard.jpg')
-
-
-@BOT.event
-async def on_message(message) -> None:
-
-    if message.guild.name != 'STEM Rehab':
-        return
-
-    parsed_message = message.content.replace(emoji.emojize(":wink:", use_aliases=True), ';)')
-
-    if parsed_message != message.content:
-        await message.edit(conent=parsed_message)
-
-    print(message.content, parsed_message)
 
 
 @BOT.event
