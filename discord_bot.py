@@ -474,7 +474,7 @@ async def on_message(message) -> None:
     if message.guild.name != 'STEM Rehab':
         return
 
-    print(message.content == emoji.emojize(':wink:'), message.content, emoji.emojize(':wink:'))
+    print(message.content == emoji.emojize(":wink:"), message.content, emoji.emojize(":wink:"))
 
 
 @BOT.event
