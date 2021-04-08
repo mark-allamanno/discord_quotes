@@ -472,7 +472,7 @@ async def on_message(message) -> None:
     if message.guild.name != 'STEM Rehab':
         return
 
-    print(message)
+    print(message.content)
 
 
 @BOT.event
