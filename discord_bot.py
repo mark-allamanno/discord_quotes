@@ -479,6 +479,8 @@ async def on_message(message) -> None:
     if parsed_message != message.content:
         await message.edit(conent=parsed_message)
 
+    print(message.content, parsed_message)
+
 
 @BOT.event
 async def on_ready() -> None:
