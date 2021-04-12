@@ -24,7 +24,7 @@ async def break_reminder(channel):
 
     # Get the image, font, and a surface to render the text to so we can write text on the image
     image = Image.open(Path(RESOURCES_PATH, 'babe-its-time.png'))
-    font = ImageFont.truetype(Path(RESOURCES_PATH, 'dejavu.ttf'), 40)
+    font = ImageFont.truetype(str(Path(RESOURCES_PATH, 'dejavu.ttf')), 40)
     render = ImageDraw.Draw(image)
 
     # Write the meme text to the template with the current time, which is the request and yes honey response
