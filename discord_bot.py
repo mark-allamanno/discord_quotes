@@ -27,6 +27,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 # Get the database and memes folder directories from the .env file
 CSV_FILE = os.getenv('DATABASE_PATH')
 MEMES_PATH = os.getenv('MEMES_FOLDER')
+RESOURCES_PATH = os.getenv('RESOURCE_FOLDER')
 
 # Get the channel that we are locking the bot to
 CHANNEL_LOCK = os.getenv('CHANNEL_LOCK')
@@ -35,11 +36,10 @@ CHANNEL_LOCK = os.getenv('CHANNEL_LOCK')
 TEMP_FILE_NAME = os.getenv('LEADERBOARD_NAME')
 
 # Then finally declare a set of seen quotes and memes at this point in time to force new random things
-SEEN_QUOTES = set()
-SEEN_MEMES = set()
+SEEN_QUOTES, SEEN_MEMES = set(), set()
 
 
-def lock_to_channel(channel) -> bool:
+def lock_to_channel(channel):
     """Short decorator function to lock these commands to the channel we decide - present in the .env file"""
     return commands.check(lambda ctx: ctx.channel.name == channel)
 
@@ -92,9 +92,8 @@ def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
 
     # Iterate over all the meme folders and update each authors count with the number of memes in their folder
     for author in Path(MEMES_PATH).iterdir():
-        if author.stem != 'special':
-            quotes, memes = scoreboard[author.stem.title()]
-            scoreboard[author.stem.title()] = quotes, len(list(author.iterdir()))
+        quotes, memes = scoreboard[author.stem.title()]
+        scoreboard[author.stem.title()] = quotes, len(list(author.iterdir()))
 
     return scoreboard
 
@@ -146,9 +145,9 @@ async def detain_prisoners(ctx) -> None:
     # Choose between the special and regular uwu jail pictures depending n if a specific person is in the jail
     # can also be sent randomly as an easter egg
     if 'TMI' in screen_names or .9 <= random.SystemRandom().random():
-        image_file = discord.File(str(Path(MEMES_PATH, 'special', 'uwu-jail-baguette.jpg')))
+        image_file = discord.File(str(Path(RESOURCES_PATH, 'uwu-jail-baguette.jpg')))
     else:
-        image_file = discord.File(str(Path(MEMES_PATH, 'special', 'uwu-jail.jpg')))
+        image_file = discord.File(str(Path(RESOURCES_PATH, 'uwu-jail.jpg')))
 
     # Then send them the uwu jail bonk picture and let then know that they are locked out. Finally sleep the thread
     await inmate_channel.send(file=image_file)
@@ -172,7 +171,7 @@ async def detain_prisoners(ctx) -> None:
 @lock_to_channel(CHANNEL_LOCK)
 async def summon_picklechu(ctx) -> None:
     """Sends a picture of Picklechu in chat so everyone can know fear"""
-    await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, 'special', 'picklechu.png'))))
+    await ctx.channel.send(file=discord.File(str(Path(RESOURCES_PATH, 'picklechu.png'))))
 
 
 @BOT.command(name='add-quote', brief='Command to add a new quote to the database')
