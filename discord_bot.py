@@ -83,9 +83,8 @@ def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
         for quote in csv.reader(college_quotes):
             for index, authors in enumerate(quote):
 
+                # If we are on the author's index then parse all authors in the quote and change their meme count
                 if index % 2 == 1:
-
-                    # If we are on the author's index then parse all authors in the quote and change their meme count
                     for author in authors.split(' & '):
                         quotes, memes = scoreboard[author]
                         scoreboard[author] = quotes + 1, memes
@@ -103,7 +102,7 @@ async def release_prisoners(ctx) -> None:
     """Prematurely removes people from the jail in case of a malfunction or an abuse of the system"""
 
     # Make sure it was me that sent the parole request, otherwise lock them out
-    if ctx.message.author.name != 'Deadpool':
+    if ctx.message.author.name != 'Inquisitive Pikachu':
         await ctx.channel.send(f"Nice try, {ctx.message.author.mention}, but this is only for emergencies")
         return
 
