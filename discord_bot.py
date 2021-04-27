@@ -94,7 +94,15 @@ def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
         quotes, memes = scoreboard[author.stem.title()]
         scoreboard[author.stem.title()] = quotes, len(list(author.iterdir()))
 
+    # Then return the completed dictionary of statistics in the form Name -> (# Quotes, # Memes)
     return scoreboard
+
+
+@BOT.command(name='summon-him', brief='Summons Picklechu from the void')
+@lock_to_channel(CHANNEL_LOCK)
+async def summon_picklechu(ctx) -> None:
+    """Sends a picture of Picklechu in chat so everyone can know fear"""
+    await ctx.channel.send(file=discord.File(str(Path(RESOURCES_PATH, 'picklechu.png'))))
 
 
 @BOT.command(name='parole', brief='Forces a release of all prisoners in uwu jail if anyone abuses it')
@@ -127,9 +135,11 @@ async def release_prisoners(ctx) -> None:
 async def detain_prisoners(ctx) -> None:
     """Moves specified people into the restricted group for 10 minutes and then automatically let them out"""
 
-    # Get the role and the channel of the uwu jail in the current server along with all mentions for the users
+    # Get the role and the channel of the uwu jail in the current server
     inmate_role = discord.utils.find(lambda r: r.name == 'uwu-jail', ctx.guild.roles)
     inmate_channel = discord.utils.find(lambda c: c.name == 'uwu-jail', ctx.guild.channels)
+
+    # Get all of the mentions of the users and their screen names
     user_mentions = ', '.join([user.mention for user in ctx.message.mentions])
     screen_names = [user.name for user in ctx.message.mentions]
 
@@ -166,20 +176,13 @@ async def detain_prisoners(ctx) -> None:
     await inmate_channel.purge()
 
 
-@BOT.command(name='summon-him', brief='Summons Picklechu from the void')
-@lock_to_channel(CHANNEL_LOCK)
-async def summon_picklechu(ctx) -> None:
-    """Sends a picture of Picklechu in chat so everyone can know fear"""
-    await ctx.channel.send(file=discord.File(str(Path(RESOURCES_PATH, 'picklechu.png'))))
-
-
 @BOT.command(name='add-quote', brief='Command to add a new quote to the database')
 @lock_to_channel(CHANNEL_LOCK)
 async def save_quote(ctx, *quote) -> None:
     """Adds a specified quote to the CSV file. Can take in a variable amount of quote/author pairs"""
 
     # Make sure the length of the arguments parameter makes sense before attempting to add it
-    if len(quote) % 2 == 1:
+    if len(quote) % 2:
         await ctx.channel.send('Malformed query, the quote should be in the form "quote" author "quote" author...')
         return
 

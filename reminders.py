@@ -1,3 +1,6 @@
+import asyncio
+import random
+
 from discord.ext import commands
 import discord
 
@@ -8,6 +11,7 @@ import sys
 import time
 from pathlib import Path
 from PIL import Image, ImageFont, ImageDraw
+
 
 # Create a new bot with the prefix of '$' for commands
 BOT = commands.Bot(command_prefix='$')
@@ -47,21 +51,22 @@ async def on_ready() -> None:
 
     if 1 < len(sys.argv):  # Make sure we were given a reminder type to send
 
+        # The channel we are looking for is general unless it is a checkin reminder
+        channel_name = 'general' if sys.argv[1] != 'Checkin' else 'reminders'
+
         # Get the correct server for this command to be sent in and then get the correct channel in th server as well
         server = discord.utils.find(lambda s: s.name == 'STEM Rehab', BOT.guilds)
-        channel = discord.utils.find(lambda c: c.name == 'general', server.channels)
+        channel = discord.utils.find(lambda c: c.name == channel_name, server.channels)
 
+        # Then send the corresponding reminder for the break type that was requested from sys.argv
         if 'Break' == sys.argv[1]:
             await break_reminder(channel)
-
         elif 'Checkin' == sys.argv[1]:
-            pass
-
+            await asyncio.sleep(random.SystemRandom().randint(10, 55))
+            await channel.send("@everyone Go check in and make sure she's actually taking her break.")
         else:
-            # Then send in the chat telling people to engage in the activity
-            await channel.send('@everyone Its that time of day again, please post the best part about your day in the '
-                               'chat. This is pseudo-mandatory meaning I cannot enforce it but you really should '
-                               'or else your peers will be annoyed with you. Have a good night :) ')
+            await channel.send("@everyone It's that time of day again, please send the best part of your day in chat "
+                               "so we can all feel a little better :)")
 
     await BOT.close()  # Then shut the bot down as that is all we need it to do, runs via crontab at 11pm daily
 
