@@ -62,7 +62,7 @@ async def on_ready() -> None:
         if 'Break' == sys.argv[1]:
             await break_reminder(channel)
         elif 'Checkin' == sys.argv[1]:
-            await asyncio.sleep(random.SystemRandom().randint(10, 55))
+            await asyncio.sleep(random.SystemRandom().randint(10, 55) * 60)
             await channel.send("@everyone Go check in and make sure she's actually taking her break.")
         else:
             await channel.send("@everyone It's that time of day again, please send the best part of your day in chat "
