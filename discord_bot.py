@@ -409,7 +409,7 @@ async def pie_chart_scoreboard(ctx, scoreboard):
 
     # Then get the number of quotes for each author and plot it and send it in chat
     num_quotes = [scoreboard[person][0] for person in authors]
-    plt.pie(num_quotes, labels=authors, autopct='%1.1f%')
+    plt.pie(num_quotes, labels=authors, autopct='%1.1f%%')
 
     # Then set a title so people know what this represents
     plt.title('Total Quote Contributions', pad=15, fontweight='bold', fontsize=30)
