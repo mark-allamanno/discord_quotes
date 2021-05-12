@@ -410,8 +410,8 @@ async def pie_chart_scoreboard(ctx, scoreboard):
         fig1, ax1 = plt.subplots()
 
         # Plot fht pie char on the matplotlib lib surface
-        ax1.pie(occurances, labels=authors, autopct='%1.1f%%', startangle=90, pctdistance=0.85,
-                textprops={'fontsize': 15})
+        ax1.pie(occurances, labels=authors, autopct='%1.1f%%', startangle=90, pctdistance=0.85, labeldistance=1.05,
+                textprops={'fontsize': 17})
         centre_circle = plt.Circle((0, 0), 0.70, fc='white')
 
         # Then set a title so people know what this represents
