@@ -402,50 +402,70 @@ async def get_statistics(ctx, *args) -> None:
 
 
 async def pie_chart_scoreboard(ctx, scoreboard):
+    """https://medium.com/@kvnamipara/a-better-visualisation-of-pie-charts-by-matplotlib-935b7667d77f"""
+
+    async def send_pie_chart(authors, occurances, content_type):
+
+        # This part minus the header was taken from the website referenced above
+        fig1, ax1 = plt.subplots()
+
+        # Plot fht pie char on the matplotlib lib surface
+        ax1.pie(occurances, labels=authors, autopct='%1.1f%%', startangle=90)
+        centre_circle = plt.Circle((0, 0), 0.70, fc='white')
+
+        # Then set a title so people know what this represents
+        plt.title(f'Total {content_type} Contributions', pad=5, fontweight='bold', fontsize=20)
+
+        # Then add the center circle to the axis so we only have the outer edges
+        fig = plt.gcf()
+        fig.gca().add_artist(centre_circle)
+
+        # Make sure it is drawn as a circle and then tighten the layout
+        ax1.axis('equal')
+        plt.tight_layout()
+
+        # Then finally save the quote pie chart and send it in chat and delete the file from
+        # the system
+        plt.savefig('quote_percentages.jpg')
+        await ctx.channel.send(file=discord.File('quote_percentages.jpg'))
+        os.remove('quote_percentages.jpg')
 
     # Get all of the authors as we need them for labeling
     total_quotes = sum([quotes for quotes, _ in scoreboard.values()])
     total_memes = sum([memes for _, memes in scoreboard.values()])
 
-    num_quotes, authors, misc = list(), list(), 0
-
+    num_quotes, quote_authors, misc_quotes = list(), list(), 0
+    num_memes, meme_authors, misc_memes = list(), list(), 0
+    
     # Then get the number of quotes for each author and plot it and send it in chat
-    for author, (quotes, _) in scoreboard.items():
+    for author, (quotes, memes) in scoreboard.items():
 
         if .01 < quotes / total_quotes:
-            authors.append(author)
+            quote_authors.append(author)
             num_quotes.append(quotes)
         else:
-            misc += quotes
+            misc_quotes += quotes
 
-    num_quotes.append(misc)
-    authors.append('Misc.')
+        if .01 < memes / total_memes:
+            meme_authors.append(author)
+            num_memes.append(memes)
+        else:
+            misc_memes += memes
 
-    explode = tuple([.05] * len(authors))
+    # Then append all of the misc quotes that were very small fractions of the whole
+    num_quotes.append(misc_quotes)
+    quote_authors.append('Misc.')
 
-    fig1, ax1 = plt.subplots()
+    # Then append all of the misc quotes that were very small fractions of the whole
+    num_memes.append(misc_memes)
+    meme_authors.append('Misc.')
 
-    ax1.pie(num_quotes, labels=authors, autopct='%1.1f%%', startangle=90, pctdistance=0.85,
-            explode=explode)  # draw circle
-
-    centre_circle = plt.Circle((0, 0), 0.70, fc='white')
-    fig = plt.gcf()
-    fig.gca().add_artist(centre_circle)  # Equal aspect ratio ensures that pie is drawn as a circle
-
-    ax1.axis('equal')
-    plt.tight_layout()
-
-    # Then set a title so people know what this represents
-    plt.title('Total Quote Contributions', pad=15, fontweight='bold', fontsize=30)
-
-    # Then finally save the quote pie chart and send it in chat and delete the file from
-    # the system
-    plt.savefig('quote_percentages.jpg')
-    await ctx.channel.send(file=discord.File('quote_percentages.jpg'))
-    os.remove('quote_percentages.jpg')
+    # THen finally send both pie charts in chat so we can all compare our contributions
+    await send_pie_chart(quote_authors, num_quotes, 'Quote')
+    await send_pie_chart(meme_authors, num_memes, 'Meme')
 
 
-async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_authors=0, piechart=False) -> None:
+async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_authors=0) -> None:
     """A relatively long function that parses the raw scoreboard data into a matplotlib graph and then sends that
     graph in the querying channel"""
 
