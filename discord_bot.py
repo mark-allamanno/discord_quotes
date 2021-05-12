@@ -406,12 +406,14 @@ async def pie_chart_scoreboard(ctx, scoreboard):
     async def send_pie_chart(authors, occurances, content_type):
         """https://medium.com/@kvnamipara/a-better-visualisation-of-pie-charts-by-matplotlib-935b7667d77f"""
 
+        slice_colors = ['#7fe5f0', '#407294', '#ff7373', '#8a2be2', '#7fffd4', '#ffd700', '#5ac18e',
+                        '#947fff', '#f0f0f0', '#f190c1']
         # This part minus the header was taken from the website referenced above
         fig1, ax1 = plt.subplots()
 
         # Plot fht pie char on the matplotlib lib surface
-        ax1.pie(occurances, labels=authors, autopct='%1.1f%%', startangle=90, pctdistance=0.85, labeldistance=1.05,
-                textprops={'fontsize': 17})
+        ax1.pie(occurances, colors=slice_colors[:len(authors)], labels=authors, autopct='%1.1f%%', startangle=90,
+                pctdistance=0.85, labeldistance=1.05, textprops={'fontsize': 19})
         centre_circle = plt.Circle((0, 0), 0.70, fc='white')
 
         # Then set a title so people know what this represents
