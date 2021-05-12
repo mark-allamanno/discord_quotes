@@ -23,7 +23,7 @@ RESOURCES_PATH = os.getenv('RESOURCE_FOLDER')
 
 
 async def break_reminder(channel):
-    """A function to send a 'Babe its time' meme in the chat to tell people to take their scheduled break from
+    """A function to send a 'Babe its Time' meme in the chat to tell people to take their scheduled break from
     STEM homework and actually live a little"""
 
     # Get the image, font, and a surface to render the text to so we can write text on the image
@@ -33,7 +33,7 @@ async def break_reminder(channel):
 
     # Write the meme text to the template with the current time, which is the request and yes honey response
     render.text((25, 650),
-                f"Babe! It's {time.strftime('%I:%M%p')} time\n"
+                f"Babe! It's {time.strftime('%I:%M%p')}, time\n"
                 f"for you to take a break",
                 fill=(0, 0, 0),
                 font=font)

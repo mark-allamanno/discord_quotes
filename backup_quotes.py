@@ -5,6 +5,9 @@ import gspread
 import os
 import csv
 
+
+# Backs up the quotes.csv file to google drive daily -- schedules in crontab
+
 # Load the .env file into memory to retrieve important variables
 dotenv.load_dotenv()
 DATABASE = os.getenv('DATABASE_PATH')

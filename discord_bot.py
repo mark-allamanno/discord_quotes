@@ -16,7 +16,6 @@ from collections import defaultdict
 from heapq import nlargest
 from typing import Dict, List, Tuple
 
-
 # Create a new bot with the prefix of '$' for commands
 BOT = commands.Bot(command_prefix='$')
 
@@ -58,14 +57,15 @@ def all_quotes_by(author) -> List[Tuple[str]]:
             if author == 'random' or any(author.title() in quote[i] for i in range(1, len(quote), 2)):
                 all_quotes.add(tuple(quote))
 
+        # Remove all of the seen quotes from the retrieved quotes
         remove_duplicates = all_quotes - SEEN_QUOTES
 
-        # If every quote of theirs has already been sent then remove them from seen and return all their quotes
+        # If every quote of theirs has already been sent then remove them all from seen and return all their quotes
         if not remove_duplicates:
             SEEN_QUOTES -= all_quotes
             return list(all_quotes)
 
-        # Otherwise just return the new and fresh quotes
+        # Otherwise just return the new and fresh quotes to prevent stagnant quoting
         return list(remove_duplicates)
 
 
@@ -81,13 +81,12 @@ def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
 
         # Get every component of every line in the csv file as we need to check each line for its authors
         for quote in csv.reader(college_quotes):
-            for index, authors in enumerate(quote):
+            for index in range(1, len(quote), 2):
 
-                # If we are on the author's index then parse all authors in the quote and change their meme count
-                if index % 2 == 1:
-                    for author in authors.split(' & '):
-                        quotes, memes = scoreboard[author]
-                        scoreboard[author] = quotes + 1, memes
+                # If we are on the author's index then parse all authors in the quote and change their meme count-
+                for author in quote[index].split(' & '):
+                    quotes, memes = scoreboard[author]
+                    scoreboard[author] = quotes + 1, memes
 
     # Iterate over all the meme folders and update each authors count with the number of memes in their folder
     for author in Path(MEMES_PATH).iterdir():
@@ -107,7 +106,8 @@ async def summon_picklechu(ctx) -> None:
 
 @BOT.command(name='parole', brief='Forces a release of all prisoners in uwu jail if anyone abuses it')
 async def release_prisoners(ctx) -> None:
-    """Prematurely removes people from the jail in case of a malfunction or an abuse of the system"""
+    """Prematurely removes people from the jail in case of a malfunction or an abuse of the system can only be used
+    by me since not everyone in the server is trustworthy with such a power"""
 
     # Make sure it was me that sent the parole request, otherwise lock them out
     if ctx.message.author.name != 'Inquisitive Pikachu':
@@ -138,18 +138,20 @@ async def detain_prisoners(ctx) -> None:
     # Get the role and the channel of the uwu jail in the current server
     inmate_role = discord.utils.find(lambda r: r.name == 'uwu-jail', ctx.guild.roles)
     inmate_channel = discord.utils.find(lambda c: c.name == 'uwu-jail', ctx.guild.channels)
+    user_mentions, screen_names = list(), list()
 
-    # Get all of the mentions of the users and their screen names
-    user_mentions = ', '.join([user.mention for user in ctx.message.mentions])
-    screen_names = [user.name for user in ctx.message.mentions]
-
-    # Then add all mentioned users to the uwu jail so they are locked there
     for user in ctx.message.mentions:
+
+        # Add each detained user's mention and their screen name
+        user_mentions.append(user.mention)
+        screen_names.append(user.name)
+
+        # Then send them to the jail role where they are locked from speaking for 5 mins
         await user.add_roles(inmate_role)
 
     # Let the invoking channel know what has happened to the user since they wont be visible for while
-    await ctx.channel.send(f'Users {user_mentions} have been sent to uwu jail for their crimes against humanity. '
-                           f'You can rest easy now.')
+    await ctx.channel.send(f'Users {", ".join(user_mentions)} have been sent to uwu jail for their crimes against '
+                           f'humanity. You can rest easy now.')
 
     # Choose between the special and regular uwu jail pictures depending n if a specific person is in the jail
     # can also be sent randomly as an easter egg
@@ -159,6 +161,7 @@ async def detain_prisoners(ctx) -> None:
         image_file = discord.File(str(Path(RESOURCES_PATH, 'uwu-jail.jpg')))
 
     # Then send them the uwu jail bonk picture and let then know that they are locked out. Finally sleep the thread
+    # for 5 minutes and then release them in much the same way
     await inmate_channel.send(file=image_file)
     await inmate_channel.send(f'{user_mentions} you are in uwu jail. You can leave when your uwu levels '
                               f'subside in approximately 5 minutes.')
@@ -228,7 +231,7 @@ async def remove_quote(ctx, *args) -> None:
         csv_writer = csv.writer(quotes_write, quoting=csv.QUOTE_ALL)
         quote_removed = False
 
-        # Read every line from the original csv file and only write it to the new one of it oes not match the quote to
+        # Read every line from the original csv file and only write it to the new one of it does not match the quote to
         # remove given by the user
         for row in csv.reader(quotes_read):
             if not all([quote.lower() == partial.lower() for quote, partial in zip(row, partial_quote)]):

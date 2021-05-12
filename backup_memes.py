@@ -5,6 +5,8 @@ import os
 import dotenv
 
 
+# Backs up all of the images (memes) to google drive once a day
+
 # Initialize and load the memes and credentials environment variables
 dotenv.load_dotenv()
 MEMES_PATH = os.getenv('MEMES_FOLDER')
@@ -39,7 +41,7 @@ for directory in os.listdir(MEMES_PATH):
     # Query google drive and check to make sure the file is not already present
     duplication = DRIVE.ListFile({'q': f"title = '{directory}' and trashed = false"}).GetList()
 
-    # If the query was empty then we have a new user and need to create a new directory for them
+    # If the query was empty then we have a new user and need to create a new directory for them in Google Drive
     if not duplication:
         folder = DRIVE.CreateFile({
             'title': directory,
