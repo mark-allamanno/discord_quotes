@@ -410,7 +410,7 @@ async def pie_chart_scoreboard(ctx, scoreboard):
         fig1, ax1 = plt.subplots()
 
         # Plot fht pie char on the matplotlib lib surface
-        ax1.pie(occurances, labels=authors, autopct='%1.1f%%', startangle=90)
+        ax1.pie(occurances, labels=authors, autopct='%1.1f%%', startangle=90, pctdistance=0.85)
         centre_circle = plt.Circle((0, 0), 0.70, fc='white')
 
         # Then set a title so people know what this represents
@@ -440,13 +440,13 @@ async def pie_chart_scoreboard(ctx, scoreboard):
     # Then get the number of quotes for each author and plot it and send it in chat
     for author, (quotes, memes) in scoreboard.items():
 
-        if .01 < quotes / total_quotes:
+        if .02 < quotes / total_quotes:
             quote_authors.append(author)
             num_quotes.append(quotes)
         else:
             misc_quotes += quotes
 
-        if .01 < memes / total_memes:
+        if .02 < memes / total_memes:
             meme_authors.append(author)
             num_memes.append(memes)
         else:
