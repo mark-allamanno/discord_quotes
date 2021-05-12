@@ -412,7 +412,7 @@ async def pie_chart_scoreboard(ctx, scoreboard):
     # Then get the number of quotes for each author and plot it and send it in chat
     for author, (quotes, _) in scoreboard.items():
 
-        if .1 < quotes / total_quotes:
+        if .01 < quotes / total_quotes:
             authors.append(author)
             num_quotes.append(quotes)
         else:
@@ -421,7 +421,7 @@ async def pie_chart_scoreboard(ctx, scoreboard):
     num_quotes.append(misc)
     authors.append('Misc.')
 
-    explode = tuple([.5] * len(authors))
+    explode = tuple([.05] * len(authors))
 
     fig1, ax1 = plt.subplots()
 
