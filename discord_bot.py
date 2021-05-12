@@ -385,6 +385,10 @@ async def get_statistics(ctx, *args) -> None:
     if len(args) == 0:
         await send_leaderboard_image(ctx, scoreboard_info)
 
+    # If the user wants to see the ratios then send a pie chart with the percentages of each user
+    elif args[0] == 'pie':
+        await pie_chart_scoreboard(ctx, scoreboard_info)
+
     # If the user is requesting to see the leaderboard of only the top n people then send that instead
     elif len(args) == 1 and args[0].isdigit():
         await send_leaderboard_image(ctx, scoreboard_info, top_n_authors=int(args[0]))
@@ -398,7 +402,41 @@ async def get_statistics(ctx, *args) -> None:
         await ctx.channel.send("Malformed leaderboard query, cannot complete request")
 
 
-async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_authors=0) -> None:
+async def pie_chart_scoreboard(ctx, scoreboard):
+
+    # Get all of the authors as we need them for labeling
+    authors = list(scoreboard.keys())
+
+    # Then get the number of quotes for each author and plot it and send it in chat
+    num_quotes = [scoreboard[person][0] for person in authors]
+    plt.pie(num_quotes, labels=authors, autopct='%1.1f%')
+
+    # Then set a title so people know what this represents
+    plt.title('Total Quote Contributions', pad=15, fontweight='bold', fontsize=30)
+
+    # Then finally save the quote pie chart and send it in chat and delete the file from
+    # the system
+    plt.savefig('quote_percentages.jpg')
+    await ctx.channel.send(file=discord.File('quote_percentages.jpg'))
+    os.remove('quote_percentages.jpg')
+
+    plt.clf()  # Clear the figure since we are going to send the meme figure right after
+
+    # Then get the number of quotes for each author and plot it and send it in chat
+    num_memes = [scoreboard[person][1] for person in authors]
+    plt.pie(num_memes, labels=authors, autopct='%1.1f%')
+
+    # Then set a title so people know what this represents
+    plt.title('Total Meme Contributions', pad=15, fontweight='bold', fontsize=30)
+
+    # Then finally save the meme pie chart and send it in chat and delete the file from
+    # the system
+    plt.savefig('meme_percentages.jpg')
+    await ctx.channel.send(file=discord.File('meme_percentages.jpg'))
+    os.remove('meme_percentages.jpg')
+
+
+async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_authors=0, piechart=False) -> None:
     """A relatively long function that parses the raw scoreboard data into a matplotlib graph and then sends that
     graph in the querying channel"""
 
