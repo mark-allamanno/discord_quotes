@@ -402,9 +402,9 @@ async def get_statistics(ctx, *args) -> None:
 
 
 async def pie_chart_scoreboard(ctx, scoreboard):
-    """https://medium.com/@kvnamipara/a-better-visualisation-of-pie-charts-by-matplotlib-935b7667d77f"""
 
     async def send_pie_chart(authors, occurances, content_type):
+        """https://medium.com/@kvnamipara/a-better-visualisation-of-pie-charts-by-matplotlib-935b7667d77f"""
 
         # This part minus the header was taken from the website referenced above
         fig1, ax1 = plt.subplots()
@@ -421,6 +421,7 @@ async def pie_chart_scoreboard(ctx, scoreboard):
         fig.gca().add_artist(centre_circle)
 
         # Make sure it is drawn as a circle and then tighten the layout
+        fig.set_size_inches(18., 14.)
         ax1.axis('equal')
         plt.tight_layout()
 
