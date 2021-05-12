@@ -141,7 +141,6 @@ async def detain_prisoners(ctx) -> None:
     user_mentions, screen_names = list(), list()
 
     for user in ctx.message.mentions:
-
         # Add each detained user's mention and their screen name
         user_mentions.append(user.mention)
         screen_names.append(user.name)
@@ -405,11 +404,36 @@ async def get_statistics(ctx, *args) -> None:
 async def pie_chart_scoreboard(ctx, scoreboard):
 
     # Get all of the authors as we need them for labeling
-    authors = list(scoreboard.keys())
+    total_quotes = sum([quotes for quotes, _ in scoreboard.values()])
+    total_memes = sum([memes for _, memes in scoreboard.values()])
+
+    num_quotes, authors, misc = list(), list(), 0
 
     # Then get the number of quotes for each author and plot it and send it in chat
-    num_quotes = [scoreboard[person][0] for person in authors]
-    plt.pie(num_quotes, labels=authors, autopct='%1.1f%%')
+    for author, (quotes, _) in scoreboard.items():
+
+        if .1 < quotes / total_quotes:
+            authors.append(author)
+            num_quotes.append(quotes)
+        else:
+            misc += quotes
+
+    num_quotes.append(misc)
+    authors.append('Misc.')
+
+    explode = tuple([.5] * len(authors))
+
+    fig1, ax1 = plt.subplots()
+
+    ax1.pie(num_quotes, labels=authors, autopct='%1.1f%%', startangle=90, pctdistance=0.85,
+            explode=explode)  # draw circle
+
+    centre_circle = plt.Circle((0, 0), 0.70, fc='white')
+    fig = plt.gcf()
+    fig.gca().add_artist(centre_circle)  # Equal aspect ratio ensures that pie is drawn as a circle
+
+    ax1.axis('equal')
+    plt.tight_layout()
 
     # Then set a title so people know what this represents
     plt.title('Total Quote Contributions', pad=15, fontweight='bold', fontsize=30)
@@ -419,21 +443,6 @@ async def pie_chart_scoreboard(ctx, scoreboard):
     plt.savefig('quote_percentages.jpg')
     await ctx.channel.send(file=discord.File('quote_percentages.jpg'))
     os.remove('quote_percentages.jpg')
-
-    plt.clf()  # Clear the figure since we are going to send the meme figure right after
-
-    # Then get the number of quotes for each author and plot it and send it in chat
-    num_memes = [scoreboard[person][1] for person in authors]
-    plt.pie(num_memes, labels=authors, autopct='%1.1f%%')
-
-    # Then set a title so people know what this represents
-    plt.title('Total Meme Contributions', pad=15, fontweight='bold', fontsize=30)
-
-    # Then finally save the meme pie chart and send it in chat and delete the file from
-    # the system
-    plt.savefig('meme_percentages.jpg')
-    await ctx.channel.send(file=discord.File('meme_percentages.jpg'))
-    os.remove('meme_percentages.jpg')
 
 
 async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_authors=0, piechart=False) -> None:
