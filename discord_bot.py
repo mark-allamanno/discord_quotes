@@ -1,20 +1,17 @@
-from discord.ext import commands
-import discord
-
-import dotenv
-
-import matplotlib.pyplot as plt
-
-import numpy as np
-
-import os
-import csv
-import random
 import asyncio
-from pathlib import Path
+import csv
+import os
+import random
 from collections import defaultdict
 from heapq import nlargest
+from pathlib import Path
 from typing import Dict, List, Tuple
+
+import discord
+import dotenv
+import matplotlib.pyplot as plt
+import numpy as np
+from discord.ext import commands
 
 # Create a new bot with the prefix of '$' for commands
 BOT = commands.Bot(command_prefix='$')
@@ -43,8 +40,18 @@ def lock_to_channel(channel):
     return commands.check(lambda ctx: ctx.channel.name == channel)
 
 
-def all_quotes_by(author) -> List[Tuple[str]]:
-    """Get all the quotes by a specified person. Returns a list of lists of a person's quotes"""
+def all_quotes_by(author: str) -> List[Tuple[str]]:
+    """
+    Get all the quotes by a specified person, removing from the possible pool all quotes that have been seen on this
+    rotation of the quote cycle. Meaning we cannot re-see a quote until we have gone through all of their quotes first.
+    Returns a list of tuples of a person's quotes
+
+    Parameters:
+        author - The name of the author to get all of the unseen quotes for
+
+    Returns:
+        quotes - A list of tuples of all quotes by this author that are currently unseen
+    """
 
     global SEEN_QUOTES  # Use the global seen quotes variable
 
@@ -70,8 +77,17 @@ def all_quotes_by(author) -> List[Tuple[str]]:
 
 
 def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
-    """Get the total count of each person's quotes and memes in the database as a dictionary of the form
-    Name -> (# Quotes, # Memes)"""
+    """
+    Get the total count of each person's quotes and memes in the database as a dictionary of the form
+    Name -> (# Quotes, # Memes) so that this can then be used by the scoreboard functions to make pretty matplotlib
+    graphs to send in the chat
+
+    Parameters:
+        Nothing
+
+    Returns:
+        scoreboard - A dictionary linking all peoples names to a tuples of (# Quotes, # Memes) counters
+    """
 
     # Declare default dictionary of peoples names to their quote/meme counts
     scoreboard = defaultdict(lambda: (0, 0))
@@ -100,14 +116,24 @@ def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
 @BOT.command(name='summon-him', brief='Summons Picklechu from the void')
 @lock_to_channel(CHANNEL_LOCK)
 async def summon_picklechu(ctx) -> None:
-    """Sends a picture of Picklechu in chat so everyone can know fear"""
+    """Sends a picture of Picklechu in chat so everyone can know true fear"""
     await ctx.channel.send(file=discord.File(str(Path(RESOURCES_PATH, 'picklechu.png'))))
 
 
-@BOT.command(name='parole', brief='Forces a release of all prisoners in uwu jail if anyone abuses it')
+@BOT.command(name='parole', brief='Forces a release of all prisoners in uwu jail if anyone abuses it or a malfunction '
+                                  'occurs in the raspberry pi')
 async def release_prisoners(ctx) -> None:
-    """Prematurely removes people from the jail in case of a malfunction or an abuse of the system can only be used
-    by me since not everyone in the server is trustworthy with such a power"""
+    """
+    Prematurely removes people from the jail channel in case of a malfunction or an abuse of the system. This is
+    done by typing in the command $parole and then mentioning every user you want to remove from the jail. Can only
+    be used by me since not everyone in the server is trustworthy with such a power
+
+    Parameters:
+        ctx - The context from which this command was send
+
+    Returns:
+        Nothing
+    """
 
     # Make sure it was me that sent the parole request, otherwise lock them out
     if ctx.message.author.name != 'Inquisitive Pikachu':
@@ -131,9 +157,19 @@ async def release_prisoners(ctx) -> None:
     await inmate_channel.purge()
 
 
-@BOT.command(name='arrest', brief='Sends the mentioned users to the uwu jail for 5 minutes')
+@BOT.command(name='arrest', brief='Sends the mentioned users to the uwu jail for 5 minutes and then auto releases them')
 async def detain_prisoners(ctx) -> None:
-    """Moves specified people into the restricted group for 10 minutes and then automatically let them out"""
+    """
+    Moves the mentioned people into the restricted group for 5 minutes and then automatically let them out if
+    everything goes as planned. You must type in $arrest and then mention all users you want to send to the jail
+    channel for this to work.
+
+    Parameters:
+        ctx - The context from which this command was send
+
+    Returns:
+        Nothing
+    """
 
     # Get the role and the channel of the uwu jail in the current server
     inmate_role = discord.utils.find(lambda r: r.name == 'uwu-jail', ctx.guild.roles)
@@ -145,7 +181,7 @@ async def detain_prisoners(ctx) -> None:
         user_mentions.append(user.mention)
         screen_names.append(user.name)
 
-        # Then send them to the jail role where they are locked from speaking for 5 mins
+        # Then send them to the jail role where they are locked from speaking for 5 minutes
         await user.add_roles(inmate_role)
 
     # Let the invoking channel know what has happened to the user since they wont be visible for while
@@ -178,10 +214,21 @@ async def detain_prisoners(ctx) -> None:
     await inmate_channel.purge()
 
 
-@BOT.command(name='add-quote', brief='Command to add a new quote to the database')
+@BOT.command(name='add-quote', brief='Adds a new quote to the database given a quote and an author')
 @lock_to_channel(CHANNEL_LOCK)
 async def save_quote(ctx, *quote) -> None:
-    """Adds a specified quote to the CSV file. Can take in a variable amount of quote/author pairs"""
+    """
+    Adds a specified quote to the database CSV file. Can take in a variable amount of quote/author pairs but it
+    should be of the form "quote" author "quote" author or else we cannot parse it correctly so follow this formatting
+    exactly as specified
+
+    Parameters:
+        ctx - The context from which this command was send
+        quote - A tuple of strings of variable length that is the quote to add to the database
+
+    Returns:
+        Nothing
+    """
 
     # Make sure the length of the arguments parameter makes sense before attempting to add it
     if len(quote) % 2:
@@ -206,10 +253,22 @@ async def save_quote(ctx, *quote) -> None:
         await ctx.channel.send('Successfully added quote to database for future usage')
 
 
-@BOT.command(name='delete-quote', brief='Command to remove a mistyped quote from the database')
+@BOT.command(name='delete-quote', brief='Removes a mistyped or mis-associated quote from the database')
 @lock_to_channel(CHANNEL_LOCK)
-async def remove_quote(ctx, *args) -> None:
-    """Removes a specified quote from the database in the case of a typo or duplicate"""
+async def remove_quote(ctx, *quote) -> None:
+    """
+    Removes a specified quote from the database in the case of a typo or semi-duplicate quote. To use you need to
+    type in the $delete-quote command and then use the format "quote" author "quote" author to remove that quote
+    from the database. It doesnt have to be the whole quote, just enough to uniquely identify it, only one
+    person can use this because it comes with great responsibility.
+
+    Parameters:
+        ctx - The context from which this command was send
+        quote - A tuple of strings of variable length that is the quote to remove from the database
+
+    Returns:
+        Nothing
+    """
 
     # Make sure the user that we want is making these edits to the database
     if ctx.message.author.name != 'Bob the Great':
@@ -218,11 +277,11 @@ async def remove_quote(ctx, *args) -> None:
 
     # If the user didnt input any arguments or they input an odd number of arguments then the query is strange,
     # so dont parse it
-    if len(args) == 0 or len(args) % 2 == 1:
+    if len(quote) == 0 or len(quote) % 2 == 1:
         await ctx.channel.send("You either didn't give a quote to delete or the quote's formatted was malformed.")
         return
 
-    partial_quote = list(args)  # Convert the arguments to a list so we can check for sublist
+    partial_quote = list(quote)  # Convert the arguments to a list so we can check for sublist
 
     with open(CSV_FILE, 'r') as quotes_read, open('college-quotes-edited.csv', 'w') as quotes_write:
 
@@ -249,11 +308,21 @@ async def remove_quote(ctx, *args) -> None:
         await ctx.channel.send("Quote was not found in the database, are you sure it is correct?")
 
 
-@BOT.command(name='quote', brief='Command to fetch a quote by a specified person or anyone if left unfilled.')
+@BOT.command(name='quote', brief='Fetches a random quote by a specified person or anyone if left unfilled')
 @lock_to_channel(CHANNEL_LOCK)
 async def get_quote(ctx, quote_author='random') -> None:
-    """Get a random quote by the person specified in the argument. Searched the database for quotes by them and
-    returns sends a random one back as a response"""
+    """
+    Get a random quote by the person specified in the argument. Searched the database for quotes by them and
+    returns sends a random one back as a response. The format should be $quote author where author is the person
+    you would like to quote
+
+    Parameters:
+        ctx - The context from which this command was send
+        quote_author - The string of the person that we want to get a quote from the database for
+
+    Returns:
+        Nothing
+    """
 
     # Get all the quotes by a specific person and then choose how to handle it
     quotes_list = all_quotes_by(quote_author)
@@ -276,10 +345,24 @@ async def get_quote(ctx, quote_author='random') -> None:
         await ctx.channel.send(f'{quote_author} not found in the database. Add some quotes for them!')
 
 
-@BOT.command(name='add-meme', brief='Command to add meme to the database associated with a specific person.')
+@BOT.command(name='add-meme', brief='Adds a new meme to the database associated with a specific person')
 @lock_to_channel(CHANNEL_LOCK)
-async def save_meme(ctx, author, *filenames) -> None:
-    """Saves memes with given filenames to the servers meme archive"""
+async def save_meme(ctx, author: str, *filenames) -> None:
+    """
+    A command to save pictures to the database, which we call memes. It will save this meme into the specified
+    authors directory, and save it under the filename you give it, and can take in a variable number of attachments
+    and filenames. Simply add an image with a command of the form $add-meme author filename1 filename2 and so one
+    with one filename per image.
+
+    Parameters:
+        ctx - The context from which this command was send
+        author - A string of the user for which we want to associate these memes with
+        *filenames - The variable list of filenames to save each attachment as
+
+    Returns:
+        Nothing
+
+    """
 
     author = author.lower()  # Make sure the author's name is lowercase for homogeneity
 
@@ -303,10 +386,23 @@ async def save_meme(ctx, author, *filenames) -> None:
     await ctx.channel.send('Meme has been saved to the database for future usage.')
 
 
-@BOT.command(name='delete-meme', brief='Command to remove a mistyped or mis-associated meme from the database')
+@BOT.command(name='delete-meme', brief='Removes a mistyped or mis-associated meme from the database')
 @lock_to_channel(CHANNEL_LOCK)
 async def remove_meme(ctx, author=None, filename=None) -> None:
-    """Removes a specified meme from the database in the case of a typo or duplicate"""
+    """
+    Removes a specified meme from the database in the case of a typo or duplicate. To use you must type in the
+    command $delete-meme and then specify an author to remove a meme from and then the filename of the meme you
+    would like to remove, that means something like $delete-meme author filename. THis is a privileged action so
+    only the admins can use it.
+
+    Parameters:
+        ctx - The context from which this command was send
+        author - The author for which we want to remove a meme from
+        filename - the filename of hte meme to remove from their directory
+
+    Returns:
+        Nothing
+    """
 
     author = author.lower()  # Lowercase the input author for homogeneity
 
@@ -337,10 +433,21 @@ async def remove_meme(ctx, author=None, filename=None) -> None:
     await ctx.channel.send(f"Meme was not present in {author}'s directory, are you sure this is the right name?")
 
 
-@BOT.command(name='meme', brief='Command to send back a meme associated with a specified person.')
+@BOT.command(name='meme', brief='Sends back a meme associated with a specified person or anyone if left unfilled')
 @lock_to_channel(CHANNEL_LOCK)
 async def get_meme(ctx, author='random') -> None:
-    """Send back a meme that is associated with a given author if they exist in the database"""
+    """
+    Send back a meme that is associated with a given author if they exist in the database, if they do not exist then
+    throw an error. This one is basically the same thing as the $quote command, nothing special. Just type in $meme
+    author to send back a meme relating to that author, or just $meme to send back someone random.
+
+    Parameters:
+        ctx - The context from which this command was send
+        author - The author for which we want to get a random meme of
+
+    Returns:
+        Nothing
+    """
 
     global SEEN_MEMES  # Use the global seen memes variable
     author = author.lower()  # Make sure the author's name is lowercase for homogeneity
@@ -373,10 +480,24 @@ async def get_meme(ctx, author='random') -> None:
     await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, author, meme))))
 
 
-@BOT.command(name='leaderboard', brief='Command to see the overall number of memes/quotes associated with each person')
+@BOT.command(name='leaderboard', brief='Sends the overall number of memes/quotes associated with each person')
 @lock_to_channel(CHANNEL_LOCK)
 async def get_statistics(ctx, *args) -> None:
-    """Send back a graph that represents the current number of quotes/memes for each person in the database"""
+    """
+    Send back a graph that represents the current number of quotes/memes for each person in the database. This
+    command though has many options to get just what you want. So you can either rtype in $leaderboard to get everyone's
+    total contributions as a bar chart. You could optionally add pie after $leaderboard to give a pie chart of the
+    relative contributions of everyone. Or add a number, $Leaderboard n to display the bar chart but only the top n
+    members. Or finally you could instead input a list of names to only get the stats for the specified people.
+    like $leaderboard bob mary jane.
+
+    Parameters:
+        ctx - The context from which this command was send
+        args - the arguments to the scoreboard function to customize it to be what the user wants
+
+    Returns:
+        Nothing
+    """
 
     scoreboard_info = get_statistics_dict()  # Get the scoreboard in the form Name -> (# Quotes, # Memes)
 
@@ -401,10 +522,37 @@ async def get_statistics(ctx, *args) -> None:
         await ctx.channel.send("Malformed leaderboard query, cannot complete request")
 
 
-async def pie_chart_scoreboard(ctx, scoreboard):
+async def pie_chart_scoreboard(ctx, scoreboard: Dict[str, Tuple[int, int]]) -> None:
+    """
+    This is another version of the barchart scoreboard below this, however this one is concerned with the
+    percentage ratios of everyone's participation in the server, not the raw numbers. So it will show us relatively
+    who is the most active among everyone in a more direct manner.
 
-    async def send_pie_chart(authors, occurances, content_type):
-        """https://medium.com/@kvnamipara/a-better-visualisation-of-pie-charts-by-matplotlib-935b7667d77f"""
+    Parameters:
+        ctx - The context from which this command was send
+        scoreboard - A dictionary linking all peoples names to a tuples of (# Quotes, # Memes) counters
+
+    Returns:
+        Nothing
+    """
+
+    async def send_pie_chart(authors: List[str], contributions: List[int], content_type: str) -> None:
+        """
+        A quick async function that takes in a list of authors and their corresponding counts for quotes/memes
+        and will create a nice and pretty pie chart from this and send it in the chat for fun. Most of the styling for
+        this graph was taken form the website below.
+
+        Parameters:
+            authors - A list of strings of all of the authors in the server
+            contributions - A list of numbers of their total contribution count to the server
+            content_type - The type of content this is counting so either memes or quotes
+
+        Returns:
+            Nothing
+
+        References:
+            https://medium.com/@kvnamipara/a-better-visualisation-of-pie-charts-by-matplotlib-935b7667d77f
+        """
 
         slice_colors = ['#7fe5f0', '#407294', '#ff7373', '#8a2be2', '#7fffd4', '#ffd700', '#5ac18e',
                         '#947fff', '#f0f0f0', '#f190c1', '#f9ae54', '#bb6c5d', '#924431', '#2e465e',
@@ -414,7 +562,7 @@ async def pie_chart_scoreboard(ctx, scoreboard):
         fig1, ax1 = plt.subplots()
 
         # Plot fht pie char on the matplotlib lib surface
-        ax1.pie(occurances, colors=slice_colors, labels=authors, autopct='%1.1f%%', startangle=90,
+        ax1.pie(contributions, colors=slice_colors, labels=authors, autopct='%1.1f%%', startangle=90,
                 pctdistance=0.85, labeldistance=1.05, textprops={'fontsize': 19})
         centre_circle = plt.Circle((0, 0), 0.70, fc='white')
 
@@ -440,18 +588,21 @@ async def pie_chart_scoreboard(ctx, scoreboard):
     total_quotes = sum([quotes for quotes, _ in scoreboard.values()])
     total_memes = sum([memes for _, memes in scoreboard.values()])
 
+    # Create a bunch of variables for the quotes, authors and misc for each quotes and memes category
     num_quotes, quote_authors, misc_quotes = list(), list(), 0
     num_memes, meme_authors, misc_memes = list(), list(), 0
-    
+
     # Then get the number of quotes for each author and plot it and send it in chat
     for author, (quotes, memes) in scoreboard.items():
 
+        # If the user has less than 2% participation in quotes then group them into misc. otherwise add them
         if .02 < quotes / total_quotes:
             quote_authors.append(author)
             num_quotes.append(quotes)
         else:
             misc_quotes += quotes
 
+        # If the user has less than 2% participation in memes then group them into misc. otherwise add them
         if .02 < memes / total_memes:
             meme_authors.append(author)
             num_memes.append(memes)
@@ -466,14 +617,27 @@ async def pie_chart_scoreboard(ctx, scoreboard):
     num_memes.append(misc_memes)
     meme_authors.append('Misc.')
 
-    # THen finally send both pie charts in chat so we can all compare our contributions
+    # Finally send both pie charts in chat so we can all compare our contributions
     await send_pie_chart(quote_authors, num_quotes, 'Quote')
     await send_pie_chart(meme_authors, num_memes, 'Meme')
 
 
-async def send_leaderboard_image(ctx, scoreboard, requested_authors=None, top_n_authors=0) -> None:
-    """A relatively long function that parses the raw scoreboard data into a matplotlib graph and then sends that
-    graph in the querying channel"""
+async def send_leaderboard_image(ctx, scoreboard: Dict[str, Tuple[int, int]], requested_authors=None,
+                                 top_n_authors=0) -> None:
+    """
+    A relatively long function that parses the raw scoreboard data into a matplotlib graph and then sends that
+    graph in the querying channel. This version is a bar graph and is relatively modular in that it can send
+    only a few people or everyone or only the top n people etc.
+
+    Parameters:
+        ctx - The context from which this command was send
+        scoreboard - A dictionary linking all peoples names to a tuples of (# Quotes, # Memes) counters
+        requested_authors - A list of requested authors, if blank then just get everyone
+        top_n_authors - An int representing we want the top n authors, if none then just get everyone
+
+    Returns:
+        Nothing
+    """
 
     # If we only want the top n authors to be displayed then filter out all others before we start
     if top_n_authors:
