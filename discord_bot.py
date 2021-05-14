@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from discord.ext import commands
 
+
 # Create a new bot with the prefix of '$' for commands
 BOT = commands.Bot(command_prefix='$')
 
@@ -177,6 +178,7 @@ async def detain_prisoners(ctx) -> None:
     user_mentions, screen_names = list(), list()
 
     for user in ctx.message.mentions:
+
         # Add each detained user's mention and their screen name
         user_mentions.append(user.mention)
         screen_names.append(user.name)
