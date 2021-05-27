@@ -22,3 +22,9 @@ async def on_ready() -> None:
         status=discord.Status.online,
         activity=discord.Activity(type=discord.ActivityType.watching, name='Tingledorf')
     )
+
+
+@BOT.command(name='change-reminders', brief='Changes the name of the server to send the reminders to')
+async def change_reminder_server(ctx, server_name):
+    dotenv.set_key('/home/pi/.env', 'REMINDER', server_name)
+    ctx.channel.send(f"Group reminders will now be send to the server {server_name}")

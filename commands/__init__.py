@@ -25,3 +25,9 @@ TEMP_FILE_NAME = os.getenv('LEADERBOARD_NAME')
 def lock_to_channel(channel):
     """Short decorator function to lock these commands to the channel we decide - present in the .env file"""
     return commands.check(lambda ctx: ctx.channel.name == channel)
+
+
+def start_bot():
+    """Short function to import all of the commands packages to add the commands to the bot then run the bot"""
+    from . import deputy, leaderboard, memes, miscellaneous, quotes
+    BOT.run(TOKEN)

@@ -18,6 +18,7 @@ BOT = commands.Bot(command_prefix='$')
 dotenv.load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 RESOURCES_PATH = os.getenv('RESOURCE_FOLDER')
+REMINDER_SERVER = os.getenv('REMINDER')
 
 
 async def break_reminder(channel):
@@ -46,13 +47,14 @@ async def break_reminder(channel):
 
 @BOT.event
 async def on_ready() -> None:
+
     if 1 < len(sys.argv):  # Make sure we were given a reminder type to send
 
         # The channel we are looking for is general unless it is a checkin reminder
         channel_name = 'general' if sys.argv[1] != 'Checkin' else 'reminders'
 
         # Get the correct server for this command to be sent in and then get the correct channel in th server as well
-        server = discord.utils.find(lambda s: s.name == 'Business Majors United', BOT.guilds)
+        server = discord.utils.find(lambda s: s.name == REMINDER_SERVER, BOT.guilds)
         channel = discord.utils.find(lambda c: c.name == channel_name, server.channels)
 
         # Then send the corresponding reminder for the break type that was requested from sys.argv
