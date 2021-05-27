@@ -1,17 +1,14 @@
 import asyncio
-import random
-
-from discord.ext import commands
-import discord
-
-import dotenv
-
 import os
+import random
 import sys
 import time
 from pathlib import Path
-from PIL import Image, ImageFont, ImageDraw
 
+import discord
+import dotenv
+from PIL import Image, ImageFont, ImageDraw
+from discord.ext import commands
 
 # Create a new bot with the prefix of '$' for commands
 BOT = commands.Bot(command_prefix='$')
@@ -48,7 +45,6 @@ async def break_reminder(channel):
 
 @BOT.event
 async def on_ready() -> None:
-
     if 1 < len(sys.argv):  # Make sure we were given a reminder type to send
 
         # The channel we are looking for is general unless it is a checkin reminder
