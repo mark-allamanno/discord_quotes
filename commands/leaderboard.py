@@ -12,8 +12,6 @@ import numpy as np
 from commands import *
 
 
-@BOT.command(name='leaderboard', brief='Sends the overall number of memes/quotes associated with each person')
-@lock_to_channel(CHANNEL_LOCK)
 def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
     """
     Get the total count of each person's quotes and memes in the database as a dictionary of the form
@@ -51,6 +49,8 @@ def get_statistics_dict() -> Dict[str, Tuple[int, int]]:
     return scoreboard
 
 
+@BOT.command(name='leaderboard', brief='Sends the overall number of memes/quotes associated with each person')
+@lock_to_channel(CHANNEL_LOCK)
 async def get_statistics(ctx, *args) -> None:
     """
     Send back a graph that represents the current number of quotes/memes for each person in the database. This
