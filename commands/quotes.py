@@ -6,6 +6,9 @@ from pathlib import Path
 from commands import *
 
 
+SEEN_QUOTES = set()  # A global variable that keeps track of all 'stale' quotes
+
+
 def all_quotes_by(author: str) -> List[Tuple[str]]:
     """
     Get all the quotes by a specified person, removing from the possible pool all quotes that have been seen on this
@@ -18,6 +21,8 @@ def all_quotes_by(author: str) -> List[Tuple[str]]:
     Returns:
         quotes - A list of tuples of all quotes by this author that are currently unseen
     """
+
+    global SEEN_QUOTES  # Make sure we can edit the global set if applicable
 
     with open(CSV_FILE, 'r') as college_quotes:
 

@@ -6,6 +6,9 @@ from pathlib import Path
 from commands import *
 
 
+SEEN_MEMES = set()  # A global variable that keeps track of all 'stale' memes
+
+
 @BOT.command(name='add-meme', brief='Adds a new meme to the database associated with a specific person')
 @lock_to_channel(CHANNEL_LOCK)
 async def save_meme(ctx, author: str, *filenames) -> None:
@@ -110,6 +113,7 @@ async def get_meme(ctx, author='random') -> None:
         Nothing
     """
 
+    global SEEN_MEMES        # Make sure we can edit the global set if applicable
     author = author.lower()  # Make sure the author's name is lowercase for homogeneity
 
     # Then make sure the author exists in the database before pulling a meme

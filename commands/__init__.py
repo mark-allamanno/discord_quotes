@@ -20,9 +20,6 @@ CHANNEL_LOCK = os.getenv('CHANNEL_LOCK')
 # Get the filename of the leaderboard image to send in the chat
 TEMP_FILE_NAME = os.getenv('LEADERBOARD_NAME')
 
-# Then finally declare a set of seen quotes and memes at this point in time to force new random things
-SEEN_QUOTES, SEEN_MEMES = set(), set()
-
 
 def lock_to_channel(channel):
     """Short decorator function to lock these commands to the channel we decide - present in the .env file"""
