@@ -85,7 +85,7 @@ async def detain_prisoners(ctx) -> None:
     # Then send them the uwu jail bonk picture and let then know that they are locked out. Finally sleep the thread
     # for 5 minutes and then release them in much the same way
     await inmate_channel.send(file=image_file)
-    await inmate_channel.send(f'{user_mentions} you are in uwu jail. You can leave when your uwu levels '
+    await inmate_channel.send(f'{", ".join(user_mentions)} you are in uwu jail. You can leave when your uwu levels '
                               f'subside in approximately 5 minutes.')
     await asyncio.sleep(300)
 

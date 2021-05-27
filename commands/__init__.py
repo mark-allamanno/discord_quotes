@@ -2,6 +2,7 @@ import os
 import dotenv
 from discord.ext import commands
 
+
 # Create a new bot with the prefix of '$' for commands
 BOT = commands.Bot(command_prefix='$')
 

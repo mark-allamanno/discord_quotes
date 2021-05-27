@@ -10,6 +10,7 @@ import dotenv
 from PIL import Image, ImageFont, ImageDraw
 from discord.ext import commands
 
+
 # Create a new bot with the prefix of '$' for commands
 BOT = commands.Bot(command_prefix='$')
 
