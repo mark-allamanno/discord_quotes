@@ -1,4 +1,7 @@
+import discord
+
 import random
+from pathlib import Path
 
 from commands import *
 

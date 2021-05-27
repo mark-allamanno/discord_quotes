@@ -1,4 +1,7 @@
+import discord
+
 from commands import *
+from commands import leaderboard, memes, miscellaneous, prison, quotes
 
 
 @BOT.event

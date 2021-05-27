@@ -1,5 +1,8 @@
+import discord
+
 import asyncio
 import random
+from pathlib import Path
 
 from commands import *
 

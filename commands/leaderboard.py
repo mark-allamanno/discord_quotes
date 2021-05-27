@@ -1,7 +1,10 @@
+import discord
+
 import csv
 from collections import defaultdict
 from heapq import nlargest
 from typing import Dict, Tuple, List
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
