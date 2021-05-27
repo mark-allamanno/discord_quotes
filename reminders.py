@@ -51,7 +51,7 @@ async def on_ready() -> None:
         channel_name = 'general' if sys.argv[1] != 'Checkin' else 'reminders'
 
         # Get the correct server for this command to be sent in and then get the correct channel in th server as well
-        server = discord.utils.find(lambda s: s.name == 'STEM Rehab', BOT.guilds)
+        server = discord.utils.find(lambda s: s.name == 'Business Majors United', BOT.guilds)
         channel = discord.utils.find(lambda c: c.name == channel_name, server.channels)
 
         # Then send the corresponding reminder for the break type that was requested from sys.argv
