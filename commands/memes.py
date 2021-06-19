@@ -28,25 +28,21 @@ async def save_meme(ctx, author: str, *filenames) -> None:
 
     """
 
-    author = author.lower()  # Make sure the author's name is lowercase for homogeneity
+    author = author.lower() # Lowercase the input author for homogeneity
 
-    # If the path to the user doesnt exist then we need to create it to prevent issues later
     if not Path(MEMES_PATH, author).exists():
         Path(MEMES_PATH, author).mkdir()
 
     for attachment, file in zip(ctx.message.attachments, filenames):
 
-        # Create a valid filename with extension for the file and get all filenames already present in the directory
         filename = f'{file.lower()}{Path(attachment.filename).suffix}'
         present_files = [name.stem for name in Path(MEMES_PATH, author).iterdir()]
 
-        # Then upload the file only if it has a unique name otherwise let the user know it failed
         if filename not in present_files:
             await attachment.save(str(Path(MEMES_PATH, author, filename)))
         else:
             await ctx.channel.send(f'Filename, {filename}, for user {author} is already taken, try again!')
 
-    # Then let the user know we have saved the meme successfully
     await ctx.channel.send('Meme has been saved to the database for future usage.')
 
 
@@ -70,22 +66,18 @@ async def remove_meme(ctx, author=None, filename=None) -> None:
 
     author = author.lower()  # Lowercase the input author for homogeneity
 
-    # Make sure the user that we want is making these edits to the database
     if ctx.message.author.name != 'Bob the Great':
         await ctx.channel.send(f"Nice try, {ctx.message.author.mention}, but this is only for emergencies")
         return
 
-    # If the path to the given author does not exist then we cannot delete any memes for them
-    if not Path(MEMES_PATH, author).exists():
+    elif not Path(MEMES_PATH, author).exists():
         await ctx.channel.send(f"{author} doesn't exist in the database, so we cannot remove a meme for them.")
         return
 
-    # Make sure the user gave us the correct amount of arguments or else fail out
     elif author is None or filename is None:
         await ctx.channel.send("Query cannot be completed because you did not give enough information.")
         return
 
-    # Otherwise iterate over the given directory to find the file to delete and delete it
     for meme_file in Path(MEMES_PATH, author).iterdir():
 
         if meme_file.stem == filename:
@@ -93,13 +85,12 @@ async def remove_meme(ctx, author=None, filename=None) -> None:
             meme_file.unlink()
             return
 
-    # If we make it here then we never found the file to remove, so something is wrong. Let the user know
     await ctx.channel.send(f"Meme was not present in {author}'s directory, are you sure this is the right name?")
 
 
 @BOT.command(name='meme', brief='Sends back a meme associated with a specified person or anyone if left unfilled')
 @lock_to_channel(CHANNEL_LOCK)
-async def get_meme(ctx, author='random') -> None:
+async def get_meme(ctx, author='random', requested_meme=None) -> None:
     """
     Send back a meme that is associated with a given author if they exist in the database, if they do not exist then
     throw an error. This one is basically the same thing as the $quote command, nothing special. Just type in $meme
@@ -116,29 +107,50 @@ async def get_meme(ctx, author='random') -> None:
     global SEEN_MEMES        # Make sure we can edit the global set if applicable
     author = author.lower()  # Make sure the author's name is lowercase for homogeneity
 
-    # Then make sure the author exists in the database before pulling a meme
     if not Path(MEMES_PATH, author).exists() and author != 'random':
         await ctx.channel.send(f'{author} has no memes associated with them. Add some!')
         return
 
-    # Create a new random generator to pick out our memes for us
+    elif requested_meme is not None:
+
+        if not Path(MEMES_PATH, author, requested_meme).exists():
+            await ctx.channel.send(f"This meme does not exist in the database, are you sure you're using this right?")
+        elif author == 'random':
+            await ctx.channel.send(f"Cannot request a specified meme for any author, that's illegal")
+        else:
+            await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, author, requested_meme))))
+
+        return
+
     random_gen = random.SystemRandom()
 
-    # Randomly choose a person if that is what the user asked for
     if author == 'random':
         author = random_gen.choice(list(Path(MEMES_PATH).iterdir()))
 
-    # Then get all of the memes for this person and remove the duplicate from the possible pool
     all_memes = {str(file) for file in Path(MEMES_PATH, author).iterdir()}
     remove_duplicates = all_memes - SEEN_MEMES
 
-    # If all of the memes are duplicates then remove all of their memes and choose from the total pool
     if not remove_duplicates:
         SEEN_MEMES -= all_memes
         meme = random_gen.choice(list(all_memes))
     else:
         meme = random_gen.choice(list(remove_duplicates))
 
-    # Then add the newly chosen meme to the seen set and send it in chat
     SEEN_MEMES.add(str(meme))
     await ctx.channel.send(file=discord.File(str(Path(MEMES_PATH, author, meme))))
+
+
+@BOT.command(name='list-memes', brief='Sends back a meme associated with a specified person or anyone if left unfilled')
+@lock_to_channel(CHANNEL_LOCK)
+async def list_memes(ctx, author=None):
+
+    if author is None:
+        await ctx.channel.send(f"No author was specified to list the associated memes for!")
+        return
+
+    elif not Path(MEMES_PATH, author).exists():
+        await ctx.channel.send(f"This author does not exist in the database, so they have no memes!")
+        return
+
+    all_meme_names = '\n'.join(sorted([meme.name for meme in Path(MEMES_PATH, author).iterdir()]))
+    await ctx.channel.send(f"All memes associated with the author are as follows:\n{all_meme_names}")
