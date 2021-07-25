@@ -9,6 +9,7 @@ from commands import *
 @lock_to_channel(CHANNEL_LOCK)
 async def summon_picklechu(ctx) -> None:
     """Sends a picture of Picklechu in chat so everyone can know true fear"""
+
     await ctx.channel.send(file=discord.File(str(Path(RESOURCES_PATH, 'picklechu.png'))))
 
 
@@ -26,7 +27,8 @@ async def on_ready() -> None:
 
 @BOT.command(name='change-reminders', brief='Changes the name of the server to send the reminders to')
 async def change_reminder_server(ctx, server_name):
-    """When we change the name of the server to send reminders to it can mess up the bot, so this is an easy way
-    to update it without having to change the source code"""
+    """When we change the name of the server that we want to send reminders to it can mess up the bot,
+    so this is an easy way to update it without having to change the source code"""
+
     dotenv.set_key('/home/pi/.env', 'REMINDER', server_name)
     await ctx.channel.send(f"Group reminders will now be send to the server {server_name}")

@@ -81,8 +81,8 @@ async def remove_meme(ctx, author=None, filename=None) -> None:
     for meme_file in Path(MEMES_PATH, author).iterdir():
 
         if meme_file.stem == filename:
-            await ctx.channel.send(f"Meme {meme_file.name} was remove from {author}'s meme folder successfully")
             meme_file.unlink()
+            await ctx.channel.send(f"Meme {meme_file.name} was remove from {author}'s meme folder successfully")
             return
 
     await ctx.channel.send(f"Meme was not present in {author}'s directory, are you sure this is the right name?")
