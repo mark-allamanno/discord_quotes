@@ -3,6 +3,7 @@ import random
 from typing import List, Tuple
 from pathlib import Path
 
+from discord import raw_models
 from fuzzywuzzy import fuzz
 
 from commands import *
@@ -143,7 +144,7 @@ async def get_quote(ctx, quote_author='random', closest_match=None) -> None:
     if quotes_list:
 
         if closest_match is not None:
-            joined_quotes = [q for i, q in enumerate(quotes_list) if not i % 2]
+            joined_quotes = [' '.join([l for i, l in enumerate(q) if not i % 2]) for q in quotes_list]
             raw_quotes = [(i, fuzz.token_set_ratio(q, closest_match)) for i, q in enumerate(joined_quotes)]
             best_match = max(raw_quotes, key=lambda q: q[1])
             quote = quotes_list[best_match[0]]
