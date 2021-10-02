@@ -3,7 +3,6 @@ import random
 from typing import List, Tuple
 from pathlib import Path
 
-from discord import raw_models
 from fuzzywuzzy import fuzz
 
 from commands import *
